@@ -8,6 +8,54 @@ const Dashboard = () => {
   const { user, globalData, refreshGlobalData } = useAuth();
   const navigate = useNavigate();
 
+  const [showOutstandingModal, setShowOutstandingModal] = useState(false);
+  const [showPendingBillsModal, setShowPendingBillsModal] = useState(false);
+  const [modalTab, setModalTab] = useState('receivable');
+  const [selectedMonth, setSelectedMonth] = useState(() => {
+    const d = new Date();
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, '0');
+    return `${y}-${m}`;
+  });
+
+  const receivableList = (globalData.employees || [])
+    .filter(emp => (emp.balance || 0) > 0)
+    .sort((a, b) => b.balance - a.balance);
+
+  const payableList = (globalData.employees || [])
+    .map(emp => {
+      const owed = (emp.balance < 0 ? Math.abs(emp.balance) : 0) + 
+        (globalData.expenses || [])
+          .filter(exp => {
+            const id = exp.employee?._id || exp.employee;
+            return id === emp._id && exp.status === 'Pending';
+          })
+          .reduce((sum, exp) => {
+            const diff = exp.totalAmount - (exp.advance || 0);
+            return sum + (diff > 0 ? diff : 0);
+          }, 0);
+      return { ...emp, owed };
+    })
+    .filter(emp => emp.owed > 0)
+    .sort((a, b) => b.owed - a.owed);
+
+  const totalEmployeePayables = payableList.reduce((sum, emp) => sum + emp.owed, 0);
+
+  const pendingBillsList = (globalData.expenses || [])
+    .filter(exp => exp.status === 'Pending')
+    .sort((a, b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
+
+  const monthlyExpense = (globalData.expenses || [])
+    .filter(exp => {
+      if (exp.status !== 'Approved' && exp.status !== 'Settled') return false;
+      if (!exp.createdAt) return false;
+      const date = new Date(exp.createdAt);
+      const y = date.getFullYear();
+      const m = String(date.getMonth() + 1).padStart(2, '0');
+      return `${y}-${m}` === selectedMonth;
+    })
+    .reduce((sum, exp) => sum + (exp.approvedTotalAmount || exp.totalAmount || 0), 0);
+
   const stats = globalData.dashboardStats || { totalOutstanding: 0, pendingBills: 0, settlementsThisMonth: 0, approvedThisWeek: 0, paidThisWeek: 0 };
   const recentBills = (globalData.expenses || [])
     .slice(0, 3)
@@ -53,26 +101,78 @@ const Dashboard = () => {
       </div>
 
       {/* Top Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {/* Total Outstanding Advance */}
         <div className="bg-white p-6 rounded-2xl border border-[#e2e8f0] shadow-sm flex items-center gap-5">
-          <div className="w-12 h-12 rounded-full bg-[#f0fdfa] flex items-center justify-center text-[#0f766e]">
+          <div className="w-12 h-12 rounded-full bg-[#f0fdfa] flex items-center justify-center text-[#0f766e] shrink-0">
             <LuWallet size={24} />
           </div>
-          <div>
-            <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest">Total Outstanding Advance</p>
+          <div className="flex-1 min-w-0">
+            <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest truncate">Outstanding Advance</p>
             <p className="text-2xl font-black text-[#0f172a] mt-0.5">৳{stats.totalOutstanding.toLocaleString()}</p>
           </div>
         </div>
 
-        {/* Pending Bills */}
+        {/* Total Employee Payables */}
+        <div 
+          onClick={() => {
+            setModalTab('payable');
+            setShowOutstandingModal(true);
+          }}
+          className="bg-white p-6 rounded-2xl border border-[#e2e8f0] shadow-sm flex items-center gap-5 cursor-pointer hover:border-[#ea580c]/40 hover:shadow-md transition-all active:scale-[0.99] group"
+        >
+          <div className="w-12 h-12 rounded-full bg-[#fff7ed] flex items-center justify-center text-[#ea580c] shrink-0 group-hover:scale-110 transition-transform">
+            <LuWallet size={24} />
+          </div>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-1">
+              <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest truncate">Employee Payables</p>
+              <span className="text-[8px] bg-[#fff7ed] text-[#ea580c] px-1.5 py-0.5 rounded-full font-black border border-orange-100 uppercase tracking-widest no-print shrink-0">View</span>
+            </div>
+            <p className="text-2xl font-black text-[#0f172a] mt-0.5">৳{totalEmployeePayables.toLocaleString()}</p>
+            <span className="text-[9px] font-bold text-[#ea580c] opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 mt-1 no-print">
+              View Breakdown <LuArrowRight size={10} />
+            </span>
+          </div>
+        </div>
+
+        {/* Monthly Expense with Date Filter */}
         <div className="bg-white p-6 rounded-2xl border border-[#e2e8f0] shadow-sm flex items-center gap-5">
-          <div className="w-12 h-12 rounded-full bg-[#fffbeb] flex items-center justify-center text-[#d97706]">
+          <div className="w-12 h-12 rounded-full bg-[#f0fdfa] flex items-center justify-center text-[#0f766e] shrink-0">
+            <LuWallet size={24} />
+          </div>
+          <div className="flex-1 min-w-0 space-y-1">
+            <div className="flex items-center justify-between gap-1.5">
+              <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest truncate">Monthly Expense</p>
+              <input 
+                type="month" 
+                value={selectedMonth}
+                onClick={(e) => e.stopPropagation()}
+                onChange={(e) => setSelectedMonth(e.target.value)}
+                className="bg-[#f8fafc] border border-[#cbd5e1] rounded-xl py-1 px-1.5 text-[10px] font-black uppercase text-[#0f766e] focus:outline-none focus:border-[#0f766e] cursor-pointer transition-all shrink-0"
+              />
+            </div>
+            <p className="text-2xl font-black text-[#0f172a] mt-0.5">৳{monthlyExpense.toLocaleString()}</p>
+          </div>
+        </div>
+
+        {/* Pending Bills */}
+        <div 
+          onClick={() => setShowPendingBillsModal(true)}
+          className="bg-white p-6 rounded-2xl border border-[#e2e8f0] shadow-sm flex items-center gap-5 cursor-pointer hover:border-[#d97706]/40 hover:shadow-md transition-all active:scale-[0.99] group"
+        >
+          <div className="w-12 h-12 rounded-full bg-[#fffbeb] flex items-center justify-center text-[#d97706] shrink-0 group-hover:scale-110 transition-transform">
             <LuFileClock size={24} />
           </div>
-          <div>
-            <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest">Pending Bills</p>
+          <div className="flex-1 min-w-0">
+            <div className="flex items-center justify-between gap-1">
+              <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest truncate">Pending Bills</p>
+              <span className="text-[8px] bg-[#fffbeb] text-[#d97706] px-1.5 py-0.5 rounded-full font-black border border-amber-100 uppercase tracking-widest no-print shrink-0">View</span>
+            </div>
             <p className="text-2xl font-black text-[#0f172a] mt-0.5">{stats.pendingBills}</p>
+            <span className="text-[9px] font-bold text-[#d97706] opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 mt-1 no-print">
+              View Pending List <LuArrowRight size={10} />
+            </span>
           </div>
         </div>
 
@@ -232,6 +332,179 @@ const Dashboard = () => {
           </div>
         </div>
       </div>
+
+      {/* Outstanding Advance Details Modal */}
+      {showOutstandingModal && (
+        <div className="fixed inset-0 bg-[#0f172a]/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full border border-[#cbd5e1]/30 shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-teal-50 flex items-center justify-center text-[#0f766e] shrink-0">
+                  <LuWallet size={20} />
+                </div>
+                <div>
+                  <h3 className="font-black text-base text-[#0f172a] uppercase tracking-tight">Advances & Payables</h3>
+                  <p className="text-[10px] text-[#64748b] font-medium mt-0.5">Summary of outstanding advance balances and employee claims.</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => {
+                  setShowOutstandingModal(false);
+                  setModalTab('receivable');
+                }}
+                className="text-xs font-black text-[#64748b] hover:text-[#0f172a] uppercase tracking-wider bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition-all cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+
+            {/* Tabs */}
+            <div className="flex border-b border-[#e2e8f0] -mx-6 px-6">
+              <button
+                onClick={() => setModalTab('receivable')}
+                className={`flex-1 pb-3 text-[11px] font-black uppercase tracking-wider border-b-2 transition-all ${
+                  modalTab === 'receivable'
+                    ? 'border-[#0f766e] text-[#0f766e]'
+                    : 'border-transparent text-[#64748b] hover:text-[#0f172a]'
+                }`}
+              >
+                অফিস পাবে (Receivables) ({receivableList.length})
+              </button>
+              <button
+                onClick={() => setModalTab('payable')}
+                className={`flex-1 pb-3 text-[11px] font-black uppercase tracking-wider border-b-2 transition-all ${
+                  modalTab === 'payable'
+                    ? 'border-[#0f766e] text-[#0f766e]'
+                    : 'border-transparent text-[#64748b] hover:text-[#0f172a]'
+                }`}
+              >
+                কর্মচারী পাবে (Payables) ({payableList.length})
+              </button>
+            </div>
+
+            <div className="max-h-[300px] overflow-y-auto divide-y divide-[#e2e8f0] pr-1">
+              {modalTab === 'receivable' ? (
+                receivableList.length > 0 ? (
+                  receivableList.map((emp) => (
+                    <div key={emp._id} className="py-3 flex items-center justify-between">
+                      <div>
+                        <h4 className="font-black text-sm text-[#0f172a] capitalize">{emp.name}</h4>
+                        <p className="text-[10px] text-[#64748b] font-bold mt-0.5">
+                          Employee ID: #{emp.employeeId || emp.phone?.slice(-4) || 'N/A'} • <span className="text-[#0f766e]">{emp.department || 'General'}</span>
+                        </p>
+                      </div>
+                      <div className="bg-[#f0fdfa] border border-[#dcfce7] px-3.5 py-1.5 rounded-2xl text-right">
+                        <span className="text-[8px] font-black text-[#0f766e] uppercase tracking-wider block">Outstanding</span>
+                        <span className="font-black text-sm text-[#0f766e]">৳{emp.balance.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-8 text-center text-xs text-[#94a3b8] font-bold">
+                    No active outstanding receivables found.
+                  </div>
+                )
+              ) : (
+                payableList.length > 0 ? (
+                  payableList.map((emp) => (
+                    <div key={emp._id} className="py-3 flex items-center justify-between">
+                      <div>
+                        <h4 className="font-black text-sm text-[#0f172a] capitalize">{emp.name}</h4>
+                        <p className="text-[10px] text-[#64748b] font-bold mt-0.5">
+                          Employee ID: #{emp.employeeId || emp.phone?.slice(-4) || 'N/A'} • <span className="text-[#0f766e]">{emp.department || 'General'}</span>
+                        </p>
+                      </div>
+                      <div className="bg-amber-50 border border-amber-200 px-3.5 py-1.5 rounded-2xl text-right">
+                        <span className="text-[8px] font-black text-amber-700 uppercase tracking-wider block">Owed Amount</span>
+                        <span className="font-black text-sm text-amber-700">৳{emp.owed.toLocaleString()}</span>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <div className="py-8 text-center text-xs text-[#94a3b8] font-bold">
+                    No active employee payables found.
+                  </div>
+                )
+              )}
+            </div>
+
+            <div className="border-t border-[#e2e8f0] pt-4 flex justify-between items-center bg-[#fafafa] -mx-6 -mb-6 p-6 rounded-b-3xl">
+              <span className="text-xs font-black text-[#64748b] uppercase tracking-widest">
+                {modalTab === 'receivable' ? 'Total Receivables' : 'Total Payables'}
+              </span>
+              <span className={`text-xl font-black ${modalTab === 'receivable' ? 'text-[#0f766e]' : 'text-amber-700'}`}>
+                ৳{modalTab === 'receivable'
+                  ? stats.totalOutstanding.toLocaleString()
+                  : payableList.reduce((sum, emp) => sum + emp.owed, 0).toLocaleString()}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* Pending Bills Details Modal */}
+      {showPendingBillsModal && (
+        <div className="fixed inset-0 bg-[#0f172a]/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-lg w-full border border-[#cbd5e1]/30 shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-3">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center text-[#d97706] shrink-0">
+                  <LuFileClock size={20} />
+                </div>
+                <div>
+                  <h3 className="font-black text-base text-[#0f172a] uppercase tracking-tight">Pending Bills</h3>
+                  <p className="text-[10px] text-[#64748b] font-medium mt-0.5">List of active bill submissions waiting for review.</p>
+                </div>
+              </div>
+              <button 
+                onClick={() => setShowPendingBillsModal(false)}
+                className="text-xs font-black text-[#64748b] hover:text-[#0f172a] uppercase tracking-wider bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition-all cursor-pointer"
+              >
+                Close
+              </button>
+            </div>
+
+            <div className="max-h-[300px] overflow-y-auto divide-y divide-[#e2e8f0] pr-1">
+              {pendingBillsList.length > 0 ? (
+                pendingBillsList.map((bill) => (
+                  <div key={bill._id} className="py-3 flex items-center justify-between hover:bg-[#fbfbfb] px-2 rounded-xl transition-colors">
+                    <div>
+                      <h4 className="font-black text-sm text-[#0f172a] capitalize">{bill.employee?.username || bill.employeeName || 'Unknown'}</h4>
+                      <p className="text-[10px] text-[#64748b] font-bold mt-0.5">
+                        {bill.createdAt ? new Date(bill.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : 'N/A'} • <span className="text-[#0f766e]">{bill.advanceId?.company?.name || 'No Company'}</span>
+                      </p>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <span className="font-black text-sm text-[#0f172a]">৳{bill.totalAmount.toLocaleString()}</span>
+                      <button 
+                        onClick={() => {
+                          setShowPendingBillsModal(false);
+                          navigate(`/admin/bill-review?id=${bill._id}`);
+                        }}
+                        className="px-2.5 py-1.5 bg-[#f0fdfa] hover:bg-[#0f766e] hover:text-white text-[#0f766e] font-black text-[9px] uppercase tracking-widest rounded-lg border border-teal-100 transition-all cursor-pointer"
+                      >
+                        Review
+                      </button>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="py-8 text-center text-xs text-[#94a3b8] font-bold">
+                  No active pending bills waiting for review.
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-[#e2e8f0] pt-4 flex justify-between items-center bg-[#fafafa] -mx-6 -mb-6 p-6 rounded-b-3xl">
+              <span className="text-xs font-black text-[#64748b] uppercase tracking-widest">
+                Total Pending Amount
+              </span>
+              <span className="text-xl font-black text-[#d97706]">
+                ৳{pendingBillsList.reduce((sum, bill) => sum + bill.totalAmount, 0).toLocaleString()}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

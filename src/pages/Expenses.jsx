@@ -3,6 +3,7 @@ import axios from 'axios';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import logo from '../assets/logo.png';
+import pdfLogo from '../assets/design/PDF LOO.png';
 import { 
   LuFileCheck, 
   LuSearch, 
@@ -30,6 +31,14 @@ const Expenses = () => {
   const [searchParams, setSearchParams] = useSearchParams();
   const billIdParam = searchParams.get('id');
 
+  const capitalizeName = (str) => {
+    if (!str) return '';
+    return str
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   const bills = (globalData.expenses || []).filter(e => e.status === 'Pending' || !e.status);
   const [selectedBill, setSelectedBill] = useState(null);
   const [approvedAmounts, setApprovedAmounts] = useState({});
@@ -37,6 +46,8 @@ const Expenses = () => {
   const [isReturned, setIsReturned] = useState(false);
   const loading = globalData.loading && bills.length === 0;
   const [submitLoading, setSubmitLoading] = useState(false);
+  const [showRejectModal, setShowRejectModal] = useState(false);
+  const [rejectionReasonInput, setRejectionReasonInput] = useState('');
 
   // Search & Filters for Master List
   const [searchQuery, setSearchQuery] = useState('');
@@ -117,13 +128,19 @@ const Expenses = () => {
     }
   };
 
-  const handleReject = async () => {
-    if (!selectedBill) return;
-    const reason = prompt('Rejection reason:');
-    if (!reason) return;
+  const handleOpenRejectModal = () => {
+    setRejectionReasonInput('');
+    setShowRejectModal(true);
+  };
+
+  const handleConfirmReject = async () => {
+    if (!rejectionReasonInput.trim()) return;
+    setShowRejectModal(false);
     setSubmitLoading(true);
     try {
-      await axios.put(`http://localhost:5000/api/expenses/${selectedBill._id || selectedBill.id}/reject`, { reason }, { headers: { Authorization: `Bearer ${user?.token}` } });
+      await axios.put(`http://localhost:5000/api/expenses/${selectedBill._id || selectedBill.id}/reject`, { 
+        reason: rejectionReasonInput.trim() 
+      }, { headers: { Authorization: `Bearer ${user?.token}` } });
       await refreshGlobalData();
       handleBackToList();
     } catch (err) {
@@ -161,6 +178,17 @@ const Expenses = () => {
   const flaggedIssues = getFlaggedIssues();
 
   // Calculations
+  const allExpenses = globalData.expenses || [];
+  const pendingCount = allExpenses.filter(e => e.status === 'Pending' || !e.status).length;
+  const approvedCount = allExpenses.filter(e => e.status === 'Approved').length;
+  const rejectedCount = allExpenses.filter(e => e.status === 'Rejected').length;
+  const settledCount = allExpenses.filter(e => e.status === 'Settled').length;
+  const reviewedCount = approvedCount + rejectedCount + settledCount;
+  const totalCount = pendingCount + reviewedCount;
+  const completionPercentage = totalCount > 0 ? Math.round((reviewedCount / totalCount) * 100) : 100;
+  const strokeDashArray = 201;
+  const strokeDashOffset = strokeDashArray - (completionPercentage / 100) * strokeDashArray;
+
   const totalSubmittedBill = selectedBill ? selectedBill.totalAmount : 0;
   const totalApprovedBill = Object.values(approvedAmounts).reduce((sum, current) => sum + current, 0);
   const diff = selectedBill ? (selectedBill.advance - totalApprovedBill) : 0;
@@ -177,6 +205,10 @@ const Expenses = () => {
       {/* Dynamic Printing Style Tag */}
       <style dangerouslySetInnerHTML={{__html: `
         @media print {
+          @page {
+            size: auto;
+            margin: 0;
+          }
           /* Hide everything */
           body * {
             visibility: hidden;
@@ -195,6 +227,7 @@ const Expenses = () => {
             box-shadow: none !important;
             border: none !important;
             background: white !important;
+            padding: 2.5cm !important;
           }
           .no-print {
             display: none !important;
@@ -386,7 +419,7 @@ const Expenses = () => {
                 <div className="space-y-2">
                   <h4 className="font-black text-sm uppercase tracking-wider">Review Status</h4>
                   <p className="text-xs text-teal-50/80 leading-relaxed max-w-[180px]">
-                    You have reviewed a total of 24 bills this month. Your average review time is 8 minutes.
+                    You have reviewed a total of <span className="font-black text-white">{reviewedCount}</span> bills. <span className="font-black text-white">{pendingCount}</span> {pendingCount === 1 ? 'bill is' : 'bills are'} currently pending approval.
                   </p>
                 </div>
                 
@@ -394,9 +427,9 @@ const Expenses = () => {
                 <div className="relative w-20 h-20 flex items-center justify-center shrink-0">
                   <svg className="w-full h-full transform -rotate-90">
                     <circle className="text-teal-950/20" cx="40" cy="40" fill="transparent" r="32" stroke="currentColor" strokeWidth="6"></circle>
-                    <circle cx="40" cy="40" fill="transparent" r="32" stroke="white" stroke-dasharray="201" stroke-dashoffset="16" strokeWidth="6" strokeLinecap="round"></circle>
+                    <circle cx="40" cy="40" fill="transparent" r="32" stroke="white" stroke-dasharray={strokeDashArray} stroke-dashoffset={strokeDashOffset} strokeWidth="6" strokeLinecap="round"></circle>
                   </svg>
-                  <span className="absolute font-black text-base">92%</span>
+                  <span className="absolute font-black text-base">{completionPercentage}%</span>
                 </div>
                 
                 {/* Soft blur circle */}
@@ -405,46 +438,44 @@ const Expenses = () => {
 
             </div>
 
-          </div>
         </div>
+      </div>
       ) : (
         /* ==================== 2. SCREEN 04 FULL-WIDTH DETAIL REVIEW PAGE ==================== */
-        <div id="printable-bill-review" className="bg-white rounded-3xl border border-[#e2e8f0] shadow-sm overflow-hidden flex flex-col justify-between">
-          
-          {/* Header Row */}
-          <div className="p-8 border-b border-[#e2e8f0] bg-[#fafafa] flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
-            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-5">
-              {/* Official Brand Logo */}
-              <img src={logo} alt="Brand Care" className="h-12 w-auto object-contain shrink-0" />
-              <div className="border-l border-[#cbd5e1] pl-5 hidden sm:block h-10"></div>
-              <div>
-                {/* Back Button (Only shown in screen view, hidden when printing) */}
-                <button 
-                  onClick={handleBackToList}
-                  className="flex items-center gap-1.5 text-xs font-black text-[#0f766e] uppercase tracking-wider mb-2 hover:underline no-print"
-                >
-                  <LuArrowLeft size={14} /> Back to Submissions list
-                </button>
+        <div className="space-y-4">
+          {/* Back Button (Only shown in screen view, hidden when printing) */}
+          <button 
+            onClick={handleBackToList}
+            className="flex items-center gap-1.5 text-xs font-black text-[#0f766e] uppercase tracking-wider hover:underline no-print"
+          >
+            <LuArrowLeft size={14} /> Back to Submissions list
+          </button>
+
+          <div id="printable-bill-review" className="bg-white rounded-3xl border border-[#e2e8f0] shadow-sm overflow-hidden flex flex-col justify-between">
+            
+            {/* Header Row - Single Row Layout */}
+            <div className="p-6 border-b border-[#e2e8f0] bg-[#fafafa] flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4">
+                {/* Official Brand Logo - Small */}
+                <img src={pdfLogo} alt="Logo" className="h-7 w-auto object-contain shrink-0" />
+                <div className="border-l border-[#cbd5e1] h-6 hidden sm:block"></div>
                 
-                <h3 className="font-black text-2xl text-[#0f172a] tracking-tight">Review Bill - {selectedBill.employeeName || 'Unknown'}</h3>
-                
-                <div className="flex items-center gap-4 mt-2">
-                  <span className="flex items-center gap-1 text-[10px] text-[#64748b] font-bold">
-                    <LuCalendar size={13} />
-                    Submitted: {selectedBill.createdAt ? new Date(selectedBill.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }) : ''}
-                  </span>
-                  <span className="bg-[#f1f5f9] text-[#475569] text-[9px] font-black uppercase tracking-wider px-2 py-0.5 rounded-md">
-                    Emp ID: #{selectedBill.employee?.phone?.slice(-4) || '3421'}
-                  </span>
-                </div>
+                {/* Employee Name (Capitalized) */}
+                <span className="font-black text-lg text-[#0f172a] uppercase tracking-tight">
+                  {capitalizeName(selectedBill.employeeName)}
+                </span>
+              </div>
+              
+              {/* Current Advance - Small and inline on the right */}
+              <div className="flex items-center gap-2 text-right shrink-0">
+                <span className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest">
+                  CURRENT ADVANCE:
+                </span>
+                <span className="text-base font-black text-[#0f766e]">
+                  ৳{Math.max(0, selectedBill.advance || 0).toLocaleString()}
+                </span>
               </div>
             </div>
-            
-            <div className="bg-white border border-[#e2e8f0] rounded-xl px-6 py-4 text-right shrink-0">
-              <p className="text-[8px] font-black text-[#94a3b8] uppercase tracking-widest">CURRENT ADVANCE</p>
-              <p className="text-2xl font-black text-[#0f766e] mt-0.5">৳{(selectedBill.advance || 0).toLocaleString()}</p>
-            </div>
-          </div>
 
           {/* Flagged Issues Alert */}
           {flaggedIssues.length > 0 && (
@@ -465,12 +496,12 @@ const Expenses = () => {
             <table className="w-full text-left border-collapse">
               <thead>
                 <tr className="border-b border-[#e2e8f0]">
-                  <th className="pb-3 text-[10px] font-black text-[#64748b] uppercase tracking-widest">Date</th>
-                  <th className="pb-3 text-[10px] font-black text-[#64748b] uppercase tracking-widest">Description (From → To)</th>
-                  <th className="pb-3 text-[10px] font-black text-[#64748b] uppercase tracking-widest">Purpose</th>
-                  <th className="pb-3 text-[10px] font-black text-[#64748b] uppercase tracking-widest">Vehicle</th>
-                  <th className="pb-3 text-[10px] font-black text-[#64748b] uppercase tracking-widest">Submitted</th>
-                  <th className="pb-3 text-[10px] font-black text-[#64748b] uppercase tracking-widest text-right">Approve Amount</th>
+                  <th className="pb-3 text-xs font-black text-[#64748b] uppercase tracking-widest">Date</th>
+                  <th className="pb-3 text-xs font-black text-[#64748b] uppercase tracking-widest">Description (From → To)</th>
+                  <th className="pb-3 text-xs font-black text-[#64748b] uppercase tracking-widest">Purpose</th>
+                  <th className="pb-3 text-xs font-black text-[#64748b] uppercase tracking-widest">Vehicle</th>
+                  <th className="pb-3 text-xs font-black text-[#64748b] uppercase tracking-widest">Submitted</th>
+                  <th className="pb-3 text-xs font-black text-[#64748b] uppercase tracking-widest text-right">Approve Amount</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#e2e8f0]">
@@ -480,22 +511,22 @@ const Expenses = () => {
                   const currentApproveVal = approvedAmounts[item._id || item.id] !== undefined ? approvedAmounts[item._id || item.id] : item.amount;
                   return (
                     <tr key={item._id || item.id} className="hover:bg-[#fbfbfb] transition-colors">
-                      <td className="py-4 text-xs font-bold text-[#0f172a] whitespace-nowrap">
+                      <td className="py-4 text-sm font-bold text-[#0f172a] whitespace-nowrap">
                         <span className="flex items-center gap-1.5">
-                          {isItemFlagged && <LuTriangleAlert size={13} className="text-red-500 shrink-0 no-print" />}
+                          {isItemFlagged && <LuTriangleAlert size={14} className="text-red-500 shrink-0 no-print" />}
                           {item.date ? new Date(item.date).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' }) : ''}
                         </span>
                       </td>
-                      <td className="py-4 text-xs font-bold text-[#64748b]">
+                      <td className="py-4 text-sm font-bold text-[#64748b]">
                         {item.from} → {item.to}
                       </td>
-                      <td className="py-4 text-xs font-bold text-[#64748b]">
+                      <td className="py-4 text-sm font-bold text-[#64748b]">
                         {item.purpose}
                       </td>
-                      <td className="py-4 text-xs font-bold text-[#64748b]">
+                      <td className="py-4 text-sm font-bold text-[#64748b]">
                         {item.vehicle}
                       </td>
-                      <td className="py-4 text-xs font-black text-[#64748b]">
+                      <td className="py-4 text-sm font-black text-[#64748b]">
                         ৳{item.amount.toLocaleString()}
                       </td>
                       <td className="py-4 text-right">
@@ -504,7 +535,7 @@ const Expenses = () => {
                           type="number"
                           value={currentApproveVal}
                           onChange={(e) => handleAmountChange(item._id || item.id, e.target.value)}
-                          className="w-24 bg-[#f8fafc] border border-[#cbd5e1] rounded-xl py-2 px-3 focus:outline-none focus:border-[#0f766e] text-right font-black text-xs print-input-value"
+                          className="w-28 bg-[#f8fafc] border border-[#cbd5e1] rounded-xl py-2.5 px-3 focus:outline-none focus:border-[#0f766e] text-right font-black text-sm print-input-value"
                         />
                       </td>
                     </tr>
@@ -517,7 +548,7 @@ const Expenses = () => {
           {/* Bottom Grid */}
           <div className="p-8 border-t border-[#e2e8f0] bg-[#fbfbfb] grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Left: Notes */}
-            <div className="space-y-3">
+            <div className="space-y-3 no-print">
               <h4 className="text-xs font-black text-[#0f172a] uppercase tracking-wider flex items-center gap-1.5">
                 <LuNotebook size={15} /> Review Notes (Optional)
               </h4>
@@ -557,38 +588,71 @@ const Expenses = () => {
                     {diff >= 0 ? 'Employee Return' : 'Office Pay'}
                   </span>
                   <p className="text-xs font-bold text-[#0f172a] mt-1 leading-relaxed">
-                    {diff >= 0 
-                      ? `Employee needs to return ৳${diff.toLocaleString()} to the office.`
-                      : `Office needs to pay ৳${Math.abs(diff).toLocaleString()} to the employee.`}
+                    {diff >= 0 ? (
+                      <>
+                        Employee needs to return <span className="text-base font-black text-[#a16207]">৳{diff.toLocaleString()}</span> to the office.
+                      </>
+                    ) : (
+                      <>
+                        Office needs to pay <span className="text-base font-black text-[#0f766e]">৳{Math.abs(diff).toLocaleString()}</span> to the employee.
+                      </>
+                    )}
                   </p>
                 </div>
 
-                {diff >= 0 && (
-                  <div className="flex gap-3 mt-4 no-print">
-                    <button 
-                      type="button"
-                      onClick={() => setIsReturned(true)}
-                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-all ${
-                        isReturned 
-                          ? 'bg-[#15803d] border-[#15803d] text-white' 
-                          : 'bg-white border-[#15803d] text-[#15803d] hover:bg-[#15803d]/5'
-                      }`}
-                    >
-                      <LuCheck size={13} /> Returned
-                    </button>
-                    <button 
-                      type="button"
-                      onClick={() => setIsReturned(false)}
-                      className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-all ${
-                        !isReturned 
-                          ? 'bg-red-600 border-red-600 text-white shadow-md shadow-red-500/10' 
-                          : 'bg-white border-red-600 text-red-600 hover:bg-red-50'
-                      }`}
-                    >
-                      <LuX size={13} /> Not Returned
-                    </button>
-                  </div>
-                )}
+                <div className="flex gap-3 mt-4 no-print">
+                  {diff >= 0 ? (
+                    <>
+                      <button 
+                        type="button"
+                        onClick={() => setIsReturned(true)}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-all ${
+                          isReturned 
+                            ? 'bg-[#15803d] border-[#15803d] text-white shadow-md shadow-green-500/10' 
+                            : 'bg-white border-[#15803d] text-[#15803d] hover:bg-[#15803d]/5'
+                        }`}
+                      >
+                        <LuCheck size={13} /> Returned
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => setIsReturned(false)}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-all ${
+                          !isReturned 
+                            ? 'bg-red-600 border-red-600 text-white shadow-md shadow-red-500/10' 
+                            : 'bg-white border-red-600 text-red-600 hover:bg-red-50'
+                        }`}
+                      >
+                        <LuX size={13} /> Not Returned
+                      </button>
+                    </>
+                  ) : (
+                    <>
+                      <button 
+                        type="button"
+                        onClick={() => setIsReturned(true)}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-all ${
+                          isReturned 
+                            ? 'bg-[#15803d] border-[#15803d] text-white shadow-md shadow-green-500/10' 
+                            : 'bg-white border-[#15803d] text-[#15803d] hover:bg-[#15803d]/5'
+                        }`}
+                      >
+                        <LuCheck size={13} /> Paid to Employee
+                      </button>
+                      <button 
+                        type="button"
+                        onClick={() => setIsReturned(false)}
+                        className={`flex-1 flex items-center justify-center gap-1.5 py-2 rounded-xl text-[10px] font-black uppercase tracking-wider border transition-all ${
+                          !isReturned 
+                            ? 'bg-red-600 border-red-600 text-white shadow-md shadow-red-500/10' 
+                            : 'bg-white border-red-600 text-red-600 hover:bg-red-50'
+                        }`}
+                      >
+                        <LuX size={13} /> Not Paid to Employee
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
             </div>
           </div>
@@ -597,7 +661,7 @@ const Expenses = () => {
           <div className="p-6 border-t border-[#e2e8f0] bg-white flex gap-4 justify-end no-print">
             <button 
               type="button" 
-              onClick={handleReject}
+              onClick={handleOpenRejectModal}
               disabled={submitLoading}
               className="px-8 py-3.5 bg-white border border-red-200 hover:bg-red-50 text-red-600 font-black text-xs uppercase tracking-widest rounded-xl transition-all"
             >
@@ -611,6 +675,54 @@ const Expenses = () => {
             >
               Approve & Submit Settlement
             </button>
+          </div>
+        </div>
+      </div>
+    )}
+
+      {/* Rejection Reason Modal */}
+      {showRejectModal && (
+        <div className="fixed inset-0 bg-[#0f172a]/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
+          <div className="bg-white rounded-3xl max-w-md w-full border border-[#cbd5e1]/30 shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in duration-200">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center text-red-500 shrink-0">
+                <LuTriangleAlert size={20} />
+              </div>
+              <div>
+                <h3 className="font-black text-base text-[#0f172a] uppercase tracking-tight">Reject Submission</h3>
+                <p className="text-[10px] text-[#64748b] font-medium mt-0.5">Please provide a reason to notify the employee.</p>
+              </div>
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-[9px] font-black text-[#64748b] uppercase tracking-widest ml-1">Rejection Reason *</label>
+              <textarea
+                rows="4"
+                placeholder="Type the rejection reason here (e.g. Invalid vehicle type, missing vouchers)..."
+                value={rejectionReasonInput}
+                onChange={(e) => setRejectionReasonInput(e.target.value)}
+                className="w-full bg-[#f8fafc] border border-[#cbd5e1] rounded-2xl p-4 text-xs font-bold text-[#0f172a] placeholder:text-[#94a3b8] focus:outline-none focus:border-red-500 focus:ring-2 focus:ring-red-500/10 resize-none transition-all"
+                required
+              />
+            </div>
+
+            <div className="flex gap-3 justify-end pt-2">
+              <button
+                type="button"
+                onClick={() => setShowRejectModal(false)}
+                className="px-5 py-3 border border-[#cbd5e1] hover:bg-[#f8fafc] text-[#64748b] font-black text-xs uppercase tracking-widest rounded-xl transition-all cursor-pointer"
+              >
+                Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmReject}
+                disabled={!rejectionReasonInput.trim()}
+                className="px-6 py-3 bg-red-600 hover:bg-red-700 disabled:opacity-50 text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg shadow-red-600/10 transition-all cursor-pointer"
+              >
+                Reject Bill
+              </button>
+            </div>
           </div>
         </div>
       )}

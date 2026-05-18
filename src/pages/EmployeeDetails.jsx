@@ -170,7 +170,7 @@ const EmployeeDetails = () => {
           </div>
           <div>
             <p className="text-[9px] font-black text-amber-800/80 uppercase tracking-widest leading-none">Current Advance</p>
-            <h3 className="text-2xl font-black text-amber-900 mt-2">৳ {currentAdvance.toLocaleString()}</h3>
+            <h3 className="text-2xl font-black text-amber-900 mt-2">৳ {Math.max(0, currentAdvance).toLocaleString()}</h3>
           </div>
         </div>
 

@@ -179,7 +179,7 @@ router.post('/advances', auth, adminOnly, async (req, res) => {
 
 router.get('/expenses', auth, async (req, res) => {
   try {
-    let query = {};
+    let query = { status: { $ne: 'Draft' } };
     if (req.user.role === 'employee') {
       query.user = req.user._id;
     }
@@ -191,9 +191,46 @@ router.get('/expenses', auth, async (req, res) => {
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
+// Get drafts for the current employee
+router.get('/expenses/my-drafts', auth, async (req, res) => {
+  try {
+    const drafts = await Expense.find({ user: req.user._id, status: 'Draft' })
+      .populate('employee')
+      .populate({ path: 'advanceId', populate: { path: 'company' } })
+      .sort({ createdAt: -1 });
+    res.json(drafts);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+// Get a specific expense/draft by ID
+router.get('/expenses/:id', auth, async (req, res) => {
+  try {
+    const expense = await Expense.findById(req.params.id)
+      .populate('employee')
+      .populate({ path: 'advanceId', populate: { path: 'company' } });
+    if (!expense) return res.status(404).json({ message: 'Bill not found' });
+    
+    // Authorization check: standard employees can only view their own bills
+    if (req.user.role === 'employee' && expense.user.toString() !== req.user._id.toString()) {
+      return res.status(403).json({ message: 'Unauthorized' });
+    }
+    res.json(expense);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+// Delete a saved draft
+router.delete('/expenses/drafts/:id', auth, async (req, res) => {
+  try {
+    const draft = await Expense.findOne({ _id: req.params.id, user: req.user._id, status: 'Draft' });
+    if (!draft) return res.status(404).json({ message: 'Draft not found' });
+    await Expense.findByIdAndDelete(req.params.id);
+    res.json({ message: 'Draft deleted successfully' });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
 router.post('/expenses', auth, async (req, res) => {
   try {
-    const { items, totalAmount, advanceId } = req.body;
+    const { items, totalAmount, advanceId, status, draftId, remarks } = req.body;
 
     // Find employee linked to this user
     const employee = await Employee.findOne({ user: req.user._id });
@@ -208,7 +245,25 @@ router.post('/expenses', auth, async (req, res) => {
       advanceAmt = employee?.balance || 0;
     }
 
-    const expense = new Expense({
+    let expense;
+    // If draftId is provided, we update the existing draft record in-place
+    if (draftId) {
+      expense = await Expense.findOne({ _id: draftId, user: req.user._id });
+      if (expense) {
+        expense.items = items;
+        expense.totalAmount = totalAmount;
+        expense.advance = advanceAmt;
+        expense.advanceId = advanceId || null;
+        expense.remarks = remarks || '';
+        expense.status = status === 'Draft' ? 'Draft' : 'Pending';
+        expense.rejectionReason = '';
+        expense.reviewNotes = '';
+        await expense.save();
+        return res.json(expense);
+      }
+    }
+
+    expense = new Expense({
       employee: employee?._id,
       employeeName: req.user.username,
       user: req.user._id,
@@ -216,7 +271,8 @@ router.post('/expenses', auth, async (req, res) => {
       totalAmount,
       advance: advanceAmt,
       advanceId: advanceId || null,
-      status: 'Pending',
+      remarks: remarks || '',
+      status: status === 'Draft' ? 'Draft' : 'Pending',
     });
     await expense.save();
     res.status(201).json(expense);
@@ -303,7 +359,7 @@ router.put('/expenses/:id/reject', auth, adminOnly, async (req, res) => {
 
 router.get('/settlements', auth, async (req, res) => {
   try {
-    const settlements = await Settlement.find().populate('employee').sort({ createdAt: -1 });
+    const settlements = await Settlement.find().populate('employee').populate('expense').sort({ createdAt: -1 });
     const totalPaid = await Settlement.aggregate([
       { $match: { type: 'Office Pay' } },
       { $group: { _id: null, total: { $sum: '$amount' } } }
@@ -328,7 +384,7 @@ router.get('/settlements/my', auth, async (req, res) => {
   try {
     const employee = await Employee.findOne({ user: req.user._id });
     if (!employee) return res.json([]);
-    const settlements = await Settlement.find({ employee: employee._id }).sort({ createdAt: -1 });
+    const settlements = await Settlement.find({ employee: employee._id }).populate('expense').sort({ createdAt: -1 });
     res.json(settlements);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });

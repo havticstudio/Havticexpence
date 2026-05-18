@@ -30,9 +30,11 @@ const Sidebar = () => {
   ];
 
   const employeeItems = [
-    { name: 'Home', icon: LuLayoutDashboard, path: '/employee' },
-    { name: 'My Expenses', icon: LuFileText, path: '/employee/expenses' },
-    { name: 'Settlement', icon: LuHistory, path: '/employee/settlements' },
+    { name: 'Dashboard', icon: LuLayoutDashboard, path: '/employee' },
+    { name: 'Bill Submit', icon: LuFileText, path: '/employee/expenses' },
+    { name: 'Drafts', icon: LuFileCheck2, path: '/employee/drafts' },
+    { name: 'History', icon: LuHistory, path: '/employee/history' },
+    { name: 'Settlement', icon: LuHandshake, path: '/employee/settlements' },
   ];
 
   const navItems = user?.role === 'admin' ? adminItems : employeeItems;

@@ -1,10 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { LuDownload, LuSearch, LuTrendingUp, LuTrendingDown, LuReceipt, LuHandshake } from 'react-icons/lu';
 
 const Settlements = () => {
   const { user, globalData, refreshGlobalData } = useAuth();
+  const navigate = useNavigate();
+
+  const handleRowClick = (s) => {
+    const expenseId = s.expense?._id || s.expense;
+    if (!expenseId) return;
+    navigate(`/admin/bill-review?id=${expenseId}`);
+  };
 
   const settlements = globalData.settlements || [];
   const stats = globalData.settlementsStats || { totalPaid: 0, totalReturned: 0 };
@@ -53,16 +61,26 @@ const Settlements = () => {
               </tr>
             </thead>
             <tbody className="divide-y divide-outline-variant/10">
-              {settlements.map((s, i) => (
-                <tr key={i} className="hover:bg-surface/50 transition-colors">
-                  <td className="px-8 py-5"><p className="font-bold text-on-surface">{s.employeeName || 'Unknown'}</p></td>
-                  <td className="px-8 py-5 text-center text-sm font-medium text-outline">{s.date ? new Date(s.date).toLocaleDateString() : '-'}</td>
-                  <td className="px-8 py-5 text-center">
-                    <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${s.type === 'Office Pay' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-purple-50 text-purple-600 border-purple-100'}`}>{s.type}</span>
-                  </td>
-                  <td className="px-8 py-5 text-right"><p className={`text-lg font-black ${s.type === 'Office Pay' ? 'text-primary' : 'text-orange-500'}`}>৳{(s.amount || 0).toLocaleString()}</p></td>
-                </tr>
-              ))}
+              {settlements.map((s, i) => {
+                const hasExpense = !!(s.expense?._id || s.expense);
+                return (
+                  <tr 
+                    key={i} 
+                    onClick={() => handleRowClick(s)}
+                    className={`transition-all ${hasExpense ? 'cursor-pointer hover:bg-slate-50' : 'opacity-90'}`}
+                  >
+                    <td className="px-8 py-5">
+                      <p className="font-bold text-on-surface">{s.employeeName || 'Unknown'}</p>
+                      {hasExpense && <span className="text-[9px] text-[#0f766e] font-black uppercase tracking-wider block mt-0.5 no-print hover:underline">View Bill Details</span>}
+                    </td>
+                    <td className="px-8 py-5 text-center text-sm font-medium text-outline">{s.date ? new Date(s.date).toLocaleDateString() : '-'}</td>
+                    <td className="px-8 py-5 text-center">
+                      <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase tracking-widest border ${s.type === 'Office Pay' ? 'bg-blue-50 text-blue-600 border-blue-100' : 'bg-purple-50 text-purple-600 border-purple-100'}`}>{s.type}</span>
+                    </td>
+                    <td className="px-8 py-5 text-right"><p className={`text-lg font-black ${s.type === 'Office Pay' ? 'text-primary' : 'text-orange-500'}`}>৳{(s.amount || 0).toLocaleString()}</p></td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         ) : (

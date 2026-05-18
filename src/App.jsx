@@ -18,6 +18,8 @@ import MySettlements from './pages/MySettlements';
 import AddEmployee from './pages/AddEmployee';
 import SubmitBill from './pages/SubmitBill';
 import EmployeeDetails from './pages/EmployeeDetails';
+import MyDrafts from './pages/MyDrafts';
+import History from './pages/History';
 
 const ProtectedRoute = ({ allowedRoles }) => {
   const { user } = useAuth();
@@ -54,6 +56,8 @@ function AppRoutes() {
         <Route path="/employee" element={<DashboardLayout />}>
           <Route index element={<MyLedger />} />
           <Route path="expenses" element={<SubmitBill />} />
+          <Route path="drafts" element={<MyDrafts />} />
+          <Route path="history" element={<History />} />
           <Route path="settlements" element={<MySettlements />} />
         </Route>
       </Route>

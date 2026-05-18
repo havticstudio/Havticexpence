@@ -1,11 +1,15 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import axios from 'axios';
 import { LuArrowLeft, LuPlus, LuTrash2, LuFileCheck, LuUpload, LuX, LuSend } from 'react-icons/lu';
 
 const SubmitBill = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const draftId = searchParams.get('draftId');
+  const reSubmitId = searchParams.get('reSubmitId');
+  const activeBillId = draftId || reSubmitId;
   const { user, globalData, refreshGlobalData } = useAuth();
   const [items, setItems] = useState([
     { id: 1, date: new Date().toISOString().split('T')[0], from: '', to: '', purpose: '', vehicle: 'CNG', amount: '' }
@@ -14,12 +18,44 @@ const SubmitBill = () => {
   const [selectedAdvanceId, setSelectedAdvanceId] = useState('');
   const [remarks, setRemarks] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loadingDraft, setLoadingDraft] = useState(false);
   const [error, setError] = useState('');
 
   useEffect(() => {
     // Refresh background state
     refreshGlobalData();
-  }, []);
+
+    // If activeBillId is present, load the bill details
+    if (activeBillId) {
+      setLoadingDraft(true);
+      axios.get(`http://localhost:5000/api/expenses/${activeBillId}`, {
+        headers: { Authorization: `Bearer ${user?.token}` }
+      })
+      .then(res => {
+        const draft = res.data;
+        if (draft) {
+          setItems(draft.items.map((item, idx) => ({
+            id: item._id || item.id || Date.now() + idx,
+            date: item.date ? item.date.split('T')[0] : new Date().toISOString().split('T')[0],
+            from: item.from || '',
+            to: item.to || '',
+            purpose: item.purpose || '',
+            vehicle: item.vehicle || 'CNG',
+            amount: item.amount || ''
+          })));
+          setSelectedAdvanceId(draft.advanceId?._id || draft.advanceId || '');
+          setRemarks(draft.remarks || '');
+        }
+      })
+      .catch(err => {
+        console.error('Failed to load bill data:', err);
+        setError('Failed to load bill data.');
+      })
+      .finally(() => {
+        setLoadingDraft(false);
+      });
+    }
+  }, [activeBillId]);
 
   const addItem = () => {
     if (items.length >= 30) return;
@@ -45,7 +81,9 @@ const SubmitBill = () => {
         items,
         totalAmount,
         advanceId: selectedAdvanceId,
-        remarks
+        remarks,
+        status: 'Pending',
+        draftId: activeBillId || undefined
       }, { headers: { Authorization: `Bearer ${user?.token}` } });
       
       // Update global context cache silently
@@ -57,12 +95,38 @@ const SubmitBill = () => {
     } finally { setLoading(false); }
   };
 
+  const handleSaveDraft = async () => {
+    if (!selectedAdvanceId) {
+      setError('Please select an advance payment first to save as a draft.');
+      return;
+    }
+    setLoading(true);
+    setError('');
+    try {
+      await axios.post('http://localhost:5000/api/expenses', {
+        items,
+        totalAmount,
+        advanceId: selectedAdvanceId,
+        remarks,
+        status: 'Draft',
+        draftId: activeBillId || undefined
+      }, { headers: { Authorization: `Bearer ${user?.token}` } });
+      
+      await refreshGlobalData();
+      navigate('/employee/drafts');
+    } catch (err) {
+      setError(err.response?.data?.message || 'Failed to save draft');
+    } finally { setLoading(false); }
+  };
+
   return (
     <div className="max-w-[1250px] mx-auto space-y-6">
       {/* Top Header */}
       <div className="flex items-start justify-between">
         <div>
-          <h1 className="text-3xl font-black text-[#0f172a] tracking-tight uppercase">Submit New Bill</h1>
+          <h1 className="text-3xl font-black text-[#0f172a] tracking-tight uppercase">
+            {reSubmitId ? 'Re-submit Rejected Bill' : draftId ? 'Edit Draft Bill' : 'Submit New Bill'}
+          </h1>
           <p className="text-[#64748b] text-sm font-medium mt-1">List your official expenses here.</p>
         </div>
         <button type="button" onClick={() => navigate(-1)} className="flex items-center gap-2 border border-[#e2e8f0] bg-white text-[#64748b] hover:bg-[#f8fafc] font-black text-xs uppercase tracking-wider px-5 py-3 rounded-xl transition-all">
@@ -188,10 +252,10 @@ const SubmitBill = () => {
             </div>
           </div>
           <div className="flex gap-4 w-full md:w-auto">
-            <button type="button" onClick={() => navigate(-1)} className="flex-1 md:flex-none px-8 py-3.5 bg-white border border-[#e2e8f0] text-[#64748b] font-black text-[11px] uppercase tracking-widest rounded-xl hover:bg-[#f8fafc] transition-all">
+            <button type="button" onClick={handleSaveDraft} disabled={loading || loadingDraft} className="flex-1 md:flex-none px-8 py-3.5 bg-white border border-[#e2e8f0] text-[#64748b] font-black text-[11px] uppercase tracking-widest rounded-xl hover:bg-[#f8fafc] transition-all">
               Save as Draft
             </button>
-            <button type="submit" disabled={loading} className="flex-1 md:flex-none px-10 py-3.5 bg-[#0f766e] hover:bg-[#0d9488] disabled:opacity-50 text-white font-black text-[11px] uppercase tracking-widest rounded-xl shadow-lg shadow-teal-700/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
+            <button type="submit" disabled={loading || loadingDraft} className="flex-1 md:flex-none px-10 py-3.5 bg-[#0f766e] hover:bg-[#0d9488] disabled:opacity-50 text-white font-black text-[11px] uppercase tracking-widest rounded-xl shadow-lg shadow-teal-700/20 flex items-center justify-center gap-2 transition-all cursor-pointer">
               <LuSend size={16} /> Submit Bill
             </button>
           </div>

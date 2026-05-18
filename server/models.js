@@ -54,7 +54,7 @@ const ExpenseSchema = new mongoose.Schema({
   advanceId: { type: mongoose.Schema.Types.ObjectId, ref: 'Advance' },
   status: { 
     type: String, 
-    enum: ['Pending', 'Approved', 'Rejected', 'Settled'], 
+    enum: ['Pending', 'Approved', 'Rejected', 'Settled', 'Draft'], 
     default: 'Pending' 
   },
   rejectionReason: String,
