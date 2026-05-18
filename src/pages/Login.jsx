@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import logo from '../assets/logo.png';
+import Logo from '../components/Logo';
 import { LuWallet, LuUser, LuLock, LuShieldCheck } from 'react-icons/lu';
 
 const Login = () => {
@@ -28,7 +28,7 @@ const Login = () => {
   return (
     <div className="min-h-screen login-bg flex flex-col items-center justify-center p-4">
       <div className="flex flex-col items-center mb-8">
-        <img src={logo} alt="Brand Care" className="h-20 w-auto object-contain max-w-[260px] drop-shadow-xl" />
+        <Logo size="lg" variant="light" />
       </div>
 
       <div className="w-full max-w-[420px] bg-white/95 backdrop-blur-xl rounded-[2.5rem] shadow-[0_32px_64px_-16px_rgba(0,0,0,0.3)] p-10 border border-white/20">

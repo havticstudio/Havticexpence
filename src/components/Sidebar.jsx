@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import logo from '../assets/logo.png';
+import Logo from './Logo';
 import { 
   LuLayoutDashboard, 
   LuUsers, 
@@ -47,7 +47,7 @@ const Sidebar = () => {
       {/* Brand Logo */}
       <div className="px-6 mb-12">
         <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate(user?.role === 'admin' ? '/admin' : '/employee')}>
-          <img src={logo} alt="Brand Care" className="h-10 w-auto object-contain max-w-[170px]" />
+          <Logo size="sm" variant="light" />
         </div>
       </div>
 
