@@ -1,0 +1,21 @@
+- [ ] **Phase 1: Foundation & Auth**
+    - [ ] Refine `src/index.css` with premium gradients and Material 3 tokens
+    - [ ] Create `src/context/AuthContext.jsx` for role-based state
+    - [ ] Create high-fidelity `src/pages/Login.jsx` (screen 10)
+    - [ ] Update `src/App.jsx` with Protected Routes and React Router 7 setup
+- [ ] **Phase 2: Layout & Common Components**
+    - [ ] Update `src/components/Sidebar.jsx` with dynamic role items
+    - [ ] Update `src/components/TopBar.jsx` with user profiles
+    - [ ] Refine `src/layouts/DashboardLayout.jsx`
+- [ ] **Phase 3: Admin Views**
+    - [ ] Redesign `src/pages/Dashboard.jsx` (screen 03)
+    - [ ] Redesign `src/pages/Employees.jsx` (screen 08)
+    - [ ] Create `src/pages/AddEmployee.jsx` (screen 02)
+    - [ ] Create `src/pages/EmployeeDetails.jsx` (screen 07)
+    - [ ] Create `src/pages/BillReview.jsx` (screen 05)
+- [ ] **Phase 4: Employee Views**
+    - [ ] Create `src/pages/MyLedger.jsx` (screen 11)
+    - [ ] Create `src/pages/SubmitBill.jsx` (screen 14)
+- [ ] **Phase 5: Polish & Final Integration**
+    - [ ] Integrate real backend API calls for each role
+    - [ ] Final audit against all 14 screens

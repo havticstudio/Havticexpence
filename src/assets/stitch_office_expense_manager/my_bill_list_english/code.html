@@ -1,0 +1,291 @@
+<!DOCTYPE html><html lang="en"><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>My Bills - Office Expense Manager</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+        tailwind.config = {
+          darkMode: "class",
+          theme: {
+            extend: {
+              "colors": {
+                      "on-background": "#191c1e",
+                      "surface-container": "#eceef0",
+                      "secondary-container": "#d5e0f8",
+                      "surface-container-low": "#f2f4f6",
+                      "tertiary-fixed": "#71f8e4",
+                      "on-secondary": "#ffffff",
+                      "on-surface-variant": "#3e4947",
+                      "tertiary-fixed-dim": "#4fdbc8",
+                      "on-primary": "#ffffff",
+                      "inverse-surface": "#2d3133",
+                      "tertiary-container": "#00776b",
+                      "secondary": "#545f73",
+                      "background": "#f7f9fb",
+                      "on-tertiary-fixed-variant": "#005048",
+                      "surface-dim": "#d8dadc",
+                      "surface-bright": "#f7f9fb",
+                      "on-primary-container": "#a3faef",
+                      "on-secondary-fixed": "#111c2d",
+                      "surface-container-lowest": "#ffffff",
+                      "primary": "#005c55",
+                      "on-error": "#ffffff",
+                      "on-error-container": "#93000a",
+                      "on-surface": "#191c1e",
+                      "surface-container-highest": "#e0e3e5",
+                      "surface-variant": "#e0e3e5",
+                      "on-secondary-container": "#586377",
+                      "primary-container": "#0f766e",
+                      "error": "#ba1a1a",
+                      "on-tertiary-fixed": "#00201c",
+                      "surface-tint": "#006a63",
+                      "outline": "#6e7977",
+                      "on-tertiary-container": "#84ffec",
+                      "outline-variant": "#bdc9c6",
+                      "secondary-fixed-dim": "#bcc7de",
+                      "primary-fixed": "#9cf2e8",
+                      "surface": "#f7f9fb",
+                      "surface-container-high": "#e6e8ea",
+                      "secondary-fixed": "#d8e3fb",
+                      "on-primary-fixed": "#00201d",
+                      "inverse-on-surface": "#eff1f3",
+                      "tertiary": "#005c52",
+                      "primary-fixed-dim": "#80d5cb",
+                      "on-secondary-fixed-variant": "#3c475a",
+                      "inverse-primary": "#80d5cb",
+                      "on-primary-fixed-variant": "#00504a",
+                      "on-tertiary": "#ffffff",
+                      "error-container": "#ffdad6"
+              },
+              "borderRadius": {
+                      "DEFAULT": "0.25rem",
+                      "lg": "0.5rem",
+                      "xl": "0.75rem",
+                      "full": "9999px"
+              },
+              "spacing": {
+                      "card-gap": "20px",
+                      "page-padding": "24px",
+                      "topnav-height": "52px",
+                      "sidebar-width": "224px",
+                      "gutter": "16px"
+              },
+              "fontFamily": {
+                      "page-title": ["Inter"],
+                      "section-title": ["Inter"],
+                      "label-medium": ["Inter"],
+                      "text-small": ["Inter"],
+                      "body-base": ["Inter"]
+              },
+              "fontSize": {
+                      "page-title": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                      "section-title": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                      "label-medium": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                      "text-small": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                      "body-base": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+              }
+            },
+          },
+        }
+    </script>
+<style>
+        body { font-family: 'Inter', sans-serif; }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface min-h-screen">
+<!-- Top Navigation Bar -->
+<header class="h-[52px] w-full fixed top-0 z-50 bg-on-background flex justify-between items-center px-page-padding shadow-sm">
+<div class="flex items-center gap-4">
+<span class="text-label-medium font-bold text-on-primary">Office Expense Manager</span>
+</div>
+<nav class="hidden md:flex items-center gap-2">
+<a class="text-secondary-fixed px-3 py-1 font-label-medium text-label-medium transition-all hover:bg-secondary" href="#">Home</a>
+<a class="bg-primary-container text-on-primary-container rounded-lg px-3 py-1 font-label-medium text-label-medium transition-all" href="#">My Expenses</a>
+<a class="text-secondary-fixed px-3 py-1 font-label-medium text-label-medium transition-all hover:bg-secondary" href="#">Settlements</a>
+</nav>
+<div class="flex items-center gap-4">
+<span class="material-symbols-outlined text-primary-fixed cursor-pointer" data-icon="notifications">notifications</span>
+<span class="material-symbols-outlined text-primary-fixed cursor-pointer" data-icon="account_circle">account_circle</span>
+<button class="hidden md:block text-secondary-fixed px-3 py-1 font-label-medium text-label-medium transition-all hover:bg-secondary">Log Out</button>
+</div>
+</header>
+<main class="pt-[72px] pb-page-padding px-page-padding max-w-7xl mx-auto">
+<!-- Header Section -->
+<div class="mb-8">
+<h1 class="font-page-title text-page-title text-on-surface mb-1">My Bills</h1>
+<p class="font-body-base text-body-base text-secondary">List of all submitted bills</p>
+</div>
+<!-- Dashboard Summary Grid (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-4 gap-card-gap mb-8">
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm col-span-1">
+<div class="flex items-center gap-3 mb-2">
+<div class="p-2 bg-secondary-container rounded-lg">
+<span class="material-symbols-outlined text-primary" data-icon="payments">payments</span>
+</div>
+<span class="font-label-medium text-label-medium text-secondary">Total Submitted</span>
+</div>
+<div class="font-page-title text-page-title">৳ 25,450</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm col-span-1">
+<div class="flex items-center gap-3 mb-2">
+<div class="p-2 bg-green-50 rounded-lg">
+<span class="material-symbols-outlined text-green-700" data-icon="check_circle">check_circle</span>
+</div>
+<span class="font-label-medium text-label-medium text-secondary">Approved</span>
+</div>
+<div class="font-page-title text-page-title">৳ 21,200</div>
+</div>
+<div class="bg-surface-container-lowest p-6 rounded-xl border border-outline-variant shadow-sm col-span-1">
+<div class="flex items-center gap-3 mb-2">
+<div class="p-2 bg-amber-50 rounded-lg">
+<span class="material-symbols-outlined text-amber-700" data-icon="pending">pending</span>
+</div>
+<span class="font-label-medium text-label-medium text-secondary">Pending</span>
+</div>
+<div class="font-page-title text-page-title">৳ 4,250</div>
+</div>
+<div class="bg-primary p-6 rounded-xl shadow-md col-span-1 flex flex-col justify-between">
+<div>
+<span class="text-on-primary font-label-medium text-label-medium opacity-80">Quick Submit</span>
+<h3 class="text-on-primary font-section-title text-section-title mt-1">Add New Bill Entry</h3>
+</div>
+<button class="mt-4 bg-on-primary text-primary px-4 py-2 rounded-lg font-label-medium text-label-medium hover:opacity-90 transition-opacity flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[18px]" data-icon="add">add</span>
+                    Add Bill
+                </button>
+</div>
+</div>
+<!-- Table Card -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden">
+<div class="p-4 border-b border-outline-variant flex justify-between items-center bg-surface-container-low">
+<h2 class="font-section-title text-section-title">Bill History</h2>
+<div class="flex gap-2">
+<button class="px-3 py-1.5 border border-outline-variant rounded-lg flex items-center gap-2 font-label-medium text-label-medium hover:bg-surface-container transition-colors">
+<span class="material-symbols-outlined text-[18px]" data-icon="filter_list">filter_list</span>
+                        Filter
+                    </button>
+</div>
+</div>
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low">
+<th class="px-6 py-4 font-section-title text-section-title text-secondary">Date</th>
+<th class="px-6 py-4 font-section-title text-section-title text-secondary">Item</th>
+<th class="px-6 py-4 font-section-title text-section-title text-secondary">Amount Submitted</th>
+<th class="px-6 py-4 font-section-title text-section-title text-secondary text-right">Approved</th>
+<th class="px-6 py-4 font-section-title text-section-title text-secondary text-center">Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant">
+<!-- Row 1 -->
+<tr class="hover:bg-surface-container-low cursor-pointer transition-colors group">
+<td class="px-6 py-4 font-body-base text-body-base">12 Oct, 2024</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="font-body-base text-body-base font-semibold">Office Stationery</span>
+<span class="text-text-small text-secondary">Paper, pens and file holders</span>
+</div>
+</td>
+<td class="px-6 py-4 font-body-base text-body-base">৳ 3,450</td>
+<td class="px-6 py-4 font-body-base text-body-base text-green-700 font-semibold text-right">৳ 3,450</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-text-small bg-green-100 text-green-700 font-medium">Approved</span>
+</td>
+</tr>
+<!-- Row 2 -->
+<tr class="hover:bg-surface-container-low cursor-pointer transition-colors group">
+<td class="px-6 py-4 font-body-base text-body-base">10 Oct, 2024</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="font-body-base text-body-base font-semibold">Travel Expense</span>
+<span class="text-text-small text-secondary">Client visit (Banani to Motijheel)</span>
+</div>
+</td>
+<td class="px-6 py-4 font-body-base text-body-base">৳ 800</td>
+<td class="px-6 py-4 font-body-base text-body-base text-right text-secondary">—</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-text-small bg-amber-100 text-amber-700 font-medium">Pending</span>
+</td>
+</tr>
+<!-- Row 3 -->
+<tr class="hover:bg-surface-container-low cursor-pointer transition-colors group">
+<td class="px-6 py-4 font-body-base text-body-base">08 Oct, 2024</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="font-body-base text-body-base font-semibold">Internet Bill</span>
+<span class="text-text-small text-secondary">September month's bill</span>
+</div>
+</td>
+<td class="px-6 py-4 font-body-base text-body-base">৳ 2,500</td>
+<td class="px-6 py-4 font-body-base text-body-base text-green-700 font-semibold text-right">৳ 2,500</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-text-small bg-green-100 text-green-700 font-medium">Approved</span>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container-low cursor-pointer transition-colors group">
+<td class="px-6 py-4 font-body-base text-body-base">05 Oct, 2024</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="font-body-base text-body-base font-semibold">Lunch Expense</span>
+<span class="text-text-small text-secondary">Team lunch (5 persons)</span>
+</div>
+</td>
+<td class="px-6 py-4 font-body-base text-body-base">৳ 3,200</td>
+<td class="px-6 py-4 font-body-base text-body-base text-right text-secondary">—</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-text-small bg-red-100 text-red-700 font-medium">Rejected</span>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container-low cursor-pointer transition-colors group">
+<td class="px-6 py-4 font-body-base text-body-base">02 Oct, 2024</td>
+<td class="px-6 py-4">
+<div class="flex flex-col">
+<span class="font-body-base text-body-base font-semibold">Maintenance</span>
+<span class="text-text-small text-secondary">AC Servicing</span>
+</div>
+</td>
+<td class="px-6 py-4 font-body-base text-body-base">৳ 4,500</td>
+<td class="px-6 py-4 font-body-base text-body-base text-green-700 font-semibold text-right">৳ 4,000</td>
+<td class="px-6 py-4 text-center">
+<span class="inline-flex items-center px-3 py-1 rounded-full text-text-small bg-green-100 text-green-700 font-medium">Approved</span>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+<!-- Pagination -->
+<div class="px-6 py-4 bg-surface-container-low flex justify-between items-center border-t border-outline-variant">
+<span class="font-text-small text-text-small text-secondary">Showing 1 - 5 of 5 bills</span>
+<div class="flex gap-1">
+<button class="p-1 rounded hover:bg-surface-container disabled:opacity-30" disabled="">
+<span class="material-symbols-outlined" data-icon="chevron_left">chevron_left</span>
+</button>
+<button class="px-3 py-1 rounded bg-primary text-on-primary font-label-medium text-label-medium">1</button>
+<button class="p-1 rounded hover:bg-surface-container">
+<span class="material-symbols-outlined" data-icon="chevron_right">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Illustration/Placeholder Section for Empty State Context -->
+<div class="mt-12 flex flex-col items-center justify-center text-center max-w-lg mx-auto">
+<div class="w-full aspect-video rounded-2xl overflow-hidden mb-6 border border-outline-variant bg-surface-container-low">
+<img alt="Financial Dashboard" class="w-full h-full object-cover grayscale opacity-60" data-alt="A sophisticated enterprise software dashboard interface displayed on a sleek laptop screen. The screen shows vibrant data visualizations, clean teal-toned graphs, and organized financial spreadsheets. The setting is a bright, modern corporate office with soft natural sunlight streaming through large windows, creating a professional and calm atmosphere. The visual style is high-key and minimalist with a premium corporate aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDt2TCFTw4m7E3s-1Kf4Rn2YbgQZXVaD3nqWEtQbV3RoQVq32c0npguGoVsV7tZCLRENKmiWRe5D-SN7dqzso2cNJqEJZ5Cffker1m3vV94J9fMZM4a_Ba5fV2-7jBwEBNGax-ZdSN2FKqyJUZJzD-h5TnLGNMujuilkjL1_BwaUbmJyunIN0fUZ9HGop5mWx_CvHth0KgWxxRY6iGiG55c559D3gtE3KDoR0rkUy8M19qpqzuCbCZLoIBslCLqSwiFRPqA2a736IhU">
+</div>
+<h3 class="font-section-title text-section-title text-on-surface">Track Expenses Easily</h3>
+<p class="font-body-base text-body-base text-secondary mt-2">Upload your daily bills quickly and get real-time approval updates. We are committed to ensuring transparency and fast payments.</p>
+</div>
+</main>
+<!-- Contextual FAB - Only for relevant screens -->
+<button class="fixed bottom-8 right-8 w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg flex items-center justify-center hover:scale-105 active:scale-95 transition-all md:hidden">
+<span class="material-symbols-outlined" data-icon="add">add</span>
+</button>
+</body></html>

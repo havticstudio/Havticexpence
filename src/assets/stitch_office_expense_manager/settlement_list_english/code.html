@@ -1,0 +1,399 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    "colors": {
+                        "on-background": "#191c1e",
+                        "surface-container": "#eceef0",
+                        "secondary-container": "#d5e0f8",
+                        "surface-container-low": "#f2f4f6",
+                        "tertiary-fixed": "#71f8e4",
+                        "on-secondary": "#ffffff",
+                        "on-surface-variant": "#3e4947",
+                        "tertiary-fixed-dim": "#4fdbc8",
+                        "on-primary": "#ffffff",
+                        "inverse-surface": "#2d3133",
+                        "tertiary-container": "#00776b",
+                        "secondary": "#545f73",
+                        "background": "#f7f9fb",
+                        "on-tertiary-fixed-variant": "#005048",
+                        "surface-dim": "#d8dadc",
+                        "surface-bright": "#f7f9fb",
+                        "on-primary-container": "#a3faef",
+                        "on-secondary-fixed": "#111c2d",
+                        "surface-container-lowest": "#ffffff",
+                        "primary": "#005c55",
+                        "on-error": "#ffffff",
+                        "on-error-container": "#93000a",
+                        "on-surface": "#191c1e",
+                        "surface-container-highest": "#e0e3e5",
+                        "surface-variant": "#e0e3e5",
+                        "on-secondary-container": "#586377",
+                        "primary-container": "#0f766e",
+                        "error": "#ba1a1a",
+                        "on-tertiary-fixed": "#00201c",
+                        "surface-tint": "#006a63",
+                        "outline": "#6e7977",
+                        "on-tertiary-container": "#84ffec",
+                        "outline-variant": "#bdc9c6",
+                        "secondary-fixed-dim": "#bcc7de",
+                        "primary-fixed": "#9cf2e8",
+                        "surface": "#f7f9fb",
+                        "surface-container-high": "#e6e8ea",
+                        "secondary-fixed": "#d8e3fb",
+                        "on-primary-fixed": "#00201d",
+                        "inverse-on-surface": "#eff1f3",
+                        "tertiary": "#005c52",
+                        "primary-fixed-dim": "#80d5cb",
+                        "on-secondary-fixed-variant": "#3c475a",
+                        "inverse-primary": "#80d5cb",
+                        "on-primary-fixed-variant": "#00504a",
+                        "on-tertiary": "#ffffff",
+                        "error-container": "#ffdad6"
+                    },
+                    "borderRadius": {
+                        "DEFAULT": "0.25rem",
+                        "lg": "0.5rem",
+                        "xl": "0.75rem",
+                        "full": "9999px"
+                    },
+                    "spacing": {
+                        "card-gap": "20px",
+                        "page-padding": "24px",
+                        "topnav-height": "52px",
+                        "sidebar-width": "224px",
+                        "gutter": "16px"
+                    },
+                    "fontFamily": {
+                        "page-title": ["Inter"],
+                        "section-title": ["Inter"],
+                        "label-medium": ["Inter"],
+                        "text-small": ["Inter"],
+                        "body-base": ["Inter"]
+                    },
+                    "fontSize": {
+                        "page-title": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                        "section-title": ["14px", {"lineHeight": "20px", "fontWeight": "600"}],
+                        "label-medium": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                        "text-small": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                        "body-base": ["14px", {"lineHeight": "20px", "fontWeight": "400"}]
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f7f9fb;
+        }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- TopNavBar -->
+<header class="h-[52px] w-full fixed top-0 z-50 bg-on-background flex justify-between items-center px-page-padding shadow-sm">
+<div class="flex items-center gap-4">
+<span class="text-label-medium font-bold text-on-primary">Office Expense Manager</span>
+<nav class="hidden md:flex gap-2">
+<a class="text-secondary-fixed px-3 py-1 font-label-medium text-label-medium hover:bg-secondary transition-all" href="#">Home</a>
+<a class="text-secondary-fixed px-3 py-1 font-label-medium text-label-medium hover:bg-secondary transition-all" href="#">My Expenses</a>
+<a class="bg-primary-container text-on-primary-container rounded-lg px-3 py-1 font-label-medium text-label-medium" href="#">Settlement</a>
+</nav>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-primary-fixed hover:bg-secondary-container transition-all p-1 rounded">notifications</button>
+<button class="material-symbols-outlined text-primary-fixed hover:bg-secondary-container transition-all p-1 rounded">account_circle</button>
+<button class="text-primary-fixed font-label-medium text-label-medium border border-primary-fixed px-3 py-1 rounded-lg hover:bg-secondary">Logout</button>
+</div>
+</header>
+<!-- SideNavBar -->
+<aside class="w-[224px] h-screen fixed left-0 top-0 bg-on-background flex flex-col py-page-padding pt-[72px] z-40">
+<div class="px-6 mb-8">
+<div class="flex items-center gap-3">
+<div class="w-10 h-10 bg-primary-container rounded-lg flex items-center justify-center">
+<span class="material-symbols-outlined text-on-primary-container">account_balance_wallet</span>
+</div>
+<div>
+<h1 class="text-on-primary font-bold text-body-base leading-tight">Expense</h1>
+<p class="text-primary-fixed text-text-small opacity-80">Manager</p>
+</div>
+</div>
+</div>
+<nav class="flex-1 space-y-1">
+<a class="flex items-center gap-3 text-secondary-fixed-dim px-4 py-2 mx-2 mb-1 hover:bg-secondary transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-medium text-label-medium">Dashboard</span>
+</a>
+<a class="flex items-center gap-3 text-secondary-fixed-dim px-4 py-2 mx-2 mb-1 hover:bg-secondary transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="font-label-medium text-label-medium">Employees</span>
+</a>
+<a class="flex items-center gap-3 text-secondary-fixed-dim px-4 py-2 mx-2 mb-1 hover:bg-secondary transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">payments</span>
+<span class="font-label-medium text-label-medium">Give Advance</span>
+</a>
+<a class="flex items-center gap-3 text-secondary-fixed-dim px-4 py-2 mx-2 mb-1 hover:bg-secondary transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">fact_check</span>
+<span class="font-label-medium text-label-medium">Bill Review</span>
+</a>
+<a class="flex items-center gap-3 bg-primary text-on-primary rounded-lg px-4 py-2 mx-2 mb-1 active:scale-95 duration-150" href="#">
+<span class="material-symbols-outlined" data-weight="fill" style="font-variation-settings: &quot;FILL&quot; 1;">handshake</span>
+<span class="font-label-medium text-label-medium">Settlement</span>
+</a>
+<a class="flex items-center gap-3 text-secondary-fixed-dim px-4 py-2 mx-2 mb-1 hover:bg-secondary transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">assessment</span>
+<span class="font-label-medium text-label-medium">Reports</span>
+</a><a class="flex items-center gap-3 text-secondary-fixed-dim px-4 py-2 mx-2 mb-1 hover:bg-secondary transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">business</span>
+<span class="font-label-medium text-label-medium">Company</span>
+</a>
+</nav>
+<div class="mt-auto border-t border-outline-variant/10 pt-4">
+<a class="flex items-center gap-3 text-secondary-fixed-dim px-4 py-2 mx-2 hover:bg-secondary transition-colors duration-200 rounded-lg" href="#">
+<span class="material-symbols-outlined">logout</span>
+<span class="font-label-medium text-label-medium">Logout</span>
+</a>
+</div>
+</aside>
+<!-- Main Content -->
+<main class="ml-[224px] pt-[52px] min-h-screen">
+<div class="p-page-padding space-y-card-gap">
+<!-- Page Header -->
+<div class="flex flex-col gap-1">
+<h2 class="font-page-title text-page-title text-on-surface">Settlement List</h2>
+<p class="font-body-base text-body-base text-secondary">History of completed settlements</p>
+</div>
+<!-- Filter Row -->
+<div class="bg-surface-container-lowest p-5 rounded-xl border border-outline-variant shadow-sm flex flex-wrap items-end gap-4">
+<div class="flex flex-col gap-1.5 flex-1 min-w-[200px]">
+<label class="font-label-medium text-label-medium text-on-surface-variant">Select Employee</label>
+<select class="h-10 border-outline-variant rounded-lg font-body-base text-body-base px-3 focus:border-primary-container focus:ring-1 focus:ring-primary-container">
+<option>All Employees</option>
+<option>Abdur Rahman</option>
+<option>Kamal Hossain</option>
+<option>Sabina Yasmin</option>
+</select>
+</div>
+<div class="flex flex-col gap-1.5 flex-1 min-w-[200px]">
+<label class="font-label-medium text-label-medium text-on-surface-variant">Select Company</label>
+<select class="h-10 border-outline-variant rounded-lg font-body-base text-body-base px-3 focus:border-primary-container focus:ring-1 focus:ring-primary-container">
+<option>All Companies</option>
+<option>Company A</option>
+<option>Company B</option>
+</select>
+</div>
+<div class="flex flex-col gap-1.5 flex-1 min-w-[200px]">
+<label class="font-label-medium text-label-medium text-on-surface-variant">Select Month</label>
+<select class="h-10 border-outline-variant rounded-lg font-body-base text-body-base px-3 focus:border-primary-container focus:ring-1 focus:ring-primary-container">
+<option>All Months</option>
+<option>January</option>
+<option>February</option>
+<option>March</option>
+<option>April</option>
+<option>May</option>
+<option>June</option>
+<option>July</option>
+<option>August</option>
+<option>September</option>
+<option>October</option>
+<option>November</option>
+<option>December</option>
+</select>
+</div>
+<button class="h-10 px-6 bg-primary text-on-primary font-section-title text-section-title rounded-lg hover:opacity-90 transition-opacity flex items-center gap-2">
+<span class="material-symbols-outlined text-[20px]">filter_alt</span>
+                    Filter
+                </button>
+</div>
+<!-- Table Card -->
+<div class="bg-surface-container-lowest rounded-xl border border-outline-variant shadow-sm overflow-hidden">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-outline-variant">
+<th class="px-6 py-4 font-section-title text-section-title text-on-surface-variant">Date</th>
+<th class="px-6 py-4 font-section-title text-section-title text-on-surface-variant">Employee</th>
+<th class="px-6 py-4 font-section-title text-section-title text-on-surface-variant">Advance</th>
+<th class="px-6 py-4 font-section-title text-section-title text-on-surface-variant">Total Bill</th>
+<th class="px-6 py-4 font-section-title text-section-title text-on-surface-variant text-right">Settlement Status</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-outline-variant/50">
+<!-- Row 1: Employee Return -->
+<tr class="hover:bg-surface-container transition-colors">
+<td class="px-6 py-4 font-body-base text-body-base">12 October, 2024</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-secondary font-bold text-text-small">AR</div>
+<span class="font-body-base text-body-base font-medium">Abdur Rahman</span>
+</div>
+</td>
+<td class="px-6 py-4 font-body-base text-body-base">৳ 5,000</td>
+<td class="px-6 py-4 font-body-base text-body-base">৳ 3,450</td>
+<td class="px-6 py-4 text-right">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 font-label-medium text-label-medium gap-1">
+<span class="material-symbols-outlined text-[16px]">call_received</span>
+                                    Refund: ৳ 1,550
+                                </span>
+</td>
+</tr>
+<!-- Row 2: Office Paid -->
+<tr class="hover:bg-surface-container transition-colors">
+<td class="px-6 py-4 font-body-base text-body-base">10 October, 2024</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary font-bold text-text-small">KH</div>
+<span class="font-body-base text-body-base font-medium">Kamal Hossain</span>
+</div>
+</td>
+<td class="px-6 py-4 font-body-base text-body-base">৳ 2,000</td>
+<td class="px-6 py-4 font-body-base text-body-base">৳ 2,720</td>
+<td class="px-6 py-4 text-right">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 font-label-medium text-label-medium gap-1">
+<span class="material-symbols-outlined text-[16px]">payments</span>
+                                    Paid: ৳ 720
+                                </span>
+</td>
+</tr>
+<!-- Row 3: Adjusted -->
+<tr class="hover:bg-surface-container transition-colors">
+<td class="px-6 py-4 font-body-base text-body-base">09 October, 2024</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-tertiary-container flex items-center justify-center text-on-tertiary font-bold text-text-small">SY</div>
+<span class="font-body-base text-body-base font-medium">Sabina Yasmin</span>
+</div>
+</td>
+<td class="px-6 py-4 font-body-base text-body-base">৳ 4,500</td>
+<td class="px-6 py-4 font-body-base text-body-base">৳ 4,500</td>
+<td class="px-6 py-4 text-right">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-slate-100 text-slate-700 font-label-medium text-label-medium gap-1">
+<span class="material-symbols-outlined text-[16px]">check_circle</span>
+                                    Adjusted (৳ 0)
+                                </span>
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-surface-container transition-colors">
+<td class="px-6 py-4 font-body-base text-body-base">05 October, 2024</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-secondary-container flex items-center justify-center text-secondary font-bold text-text-small">RH</div>
+<span class="font-body-base text-body-base font-medium">Rakib Hasan</span>
+</div>
+</td>
+<td class="px-6 py-4 font-body-base text-body-base">৳ 10,000</td>
+<td class="px-6 py-4 font-body-base text-body-base">৳ 7,800</td>
+<td class="px-6 py-4 text-right">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-amber-100 text-amber-700 font-label-medium text-label-medium gap-1">
+<span class="material-symbols-outlined text-[16px]">call_received</span>
+                                    Refund: ৳ 2,200
+                                </span>
+</td>
+</tr>
+<!-- Row 5 -->
+<tr class="hover:bg-surface-container transition-colors">
+<td class="px-6 py-4 font-body-base text-body-base">03 October, 2024</td>
+<td class="px-6 py-4">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-container flex items-center justify-center text-on-primary font-bold text-text-small">MA</div>
+<span class="font-body-base text-body-base font-medium">Md. Arif</span>
+</div>
+</td>
+<td class="px-6 py-4 font-body-base text-body-base">৳ 1,000</td>
+<td class="px-6 py-4 font-body-base text-body-base">৳ 1,450</td>
+<td class="px-6 py-4 text-right">
+<span class="inline-flex items-center px-3 py-1 rounded-full bg-green-100 text-green-700 font-label-medium text-label-medium gap-1">
+<span class="material-symbols-outlined text-[16px]">payments</span>
+                                    Paid: ৳ 450
+                                </span>
+</td>
+</tr>
+</tbody>
+</table>
+<!-- Pagination -->
+<div class="px-6 py-4 bg-surface-container-low flex justify-between items-center border-t border-outline-variant">
+<span class="font-text-small text-text-small text-secondary">Showing 5 records in total</span>
+<div class="flex gap-2">
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant hover:bg-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_left</span>
+</button>
+<button class="w-8 h-8 flex items-center justify-center rounded bg-primary text-on-primary font-label-medium text-label-medium">1</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant hover:bg-surface transition-colors font-label-medium text-label-medium text-secondary">2</button>
+<button class="w-8 h-8 flex items-center justify-center rounded border border-outline-variant hover:bg-surface transition-colors">
+<span class="material-symbols-outlined text-[18px]">chevron_right</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Summary Section (Bento Style) -->
+<div class="grid grid-cols-1 md:grid-cols-3 gap-card-gap">
+<div class="bg-amber-50 p-6 rounded-xl border border-amber-200 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-amber-100 rounded-lg">
+<span class="material-symbols-outlined text-amber-700">call_received</span>
+</div>
+<span class="font-text-small text-text-small text-amber-800">This Month</span>
+</div>
+<h4 class="font-label-medium text-label-medium text-amber-800 mb-1">Total Refund Received</h4>
+<p class="font-page-title text-page-title text-amber-900">৳ 3,750</p>
+</div>
+<div class="bg-green-50 p-6 rounded-xl border border-green-200 shadow-sm">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-green-100 rounded-lg">
+<span class="material-symbols-outlined text-green-700">payments</span>
+</div>
+<span class="font-text-small text-text-small text-green-800">This Month</span>
+</div>
+<h4 class="font-label-medium text-label-medium text-green-800 mb-1">Total Extra Paid</h4>
+<p class="font-page-title text-page-title text-green-900">৳ 1,170</p>
+</div>
+<div class="bg-on-background p-6 rounded-xl shadow-sm relative overflow-hidden">
+<div class="relative z-10">
+<div class="flex justify-between items-start mb-4">
+<div class="p-2 bg-primary-container rounded-lg">
+<span class="material-symbols-outlined text-on-primary-container">fact_check</span>
+</div>
+<span class="font-text-small text-text-small text-primary-fixed">Lifetime</span>
+</div>
+<h4 class="font-label-medium text-label-medium text-primary-fixed mb-1">Total Settlements</h4>
+<p class="font-page-title text-page-title text-on-primary">158 Units</p>
+</div>
+<div class="absolute -right-4 -bottom-4 opacity-10">
+<span class="material-symbols-outlined text-[100px] text-white">analytics</span>
+</div>
+</div>
+</div>
+</div>
+</main>
+<!-- Bottom Nav for Mobile -->
+<nav class="md:hidden fixed bottom-0 left-0 right-0 h-16 bg-on-background flex justify-around items-center px-4 z-50">
+<button class="flex flex-col items-center gap-1 text-secondary-fixed-dim">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="text-[10px]">Home</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-secondary-fixed-dim">
+<span class="material-symbols-outlined">fact_check</span>
+<span class="text-[10px]">Review</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-primary-fixed">
+<span class="material-symbols-outlined" style="font-variation-settings: &quot;FILL&quot; 1;">handshake</span>
+<span class="text-[10px]">Settlement</span>
+</button>
+<button class="flex flex-col items-center gap-1 text-secondary-fixed-dim">
+<span class="material-symbols-outlined">assessment</span>
+<span class="text-[10px]">Reports</span>
+</button>
+</nav>
+
+
+</body></html>

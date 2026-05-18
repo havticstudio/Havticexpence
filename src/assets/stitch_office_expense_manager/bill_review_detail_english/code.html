@@ -1,0 +1,316 @@
+<!DOCTYPE html><html class="light" lang="en" style=""><head>
+<meta charset="utf-8">
+<meta content="width=device-width, initial-scale=1.0" name="viewport">
+<title>Bill Review - Office Expense Manager</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet">
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "secondary": "#545f73",
+                    "surface-container-high": "#e6e8ea",
+                    "surface-container-lowest": "#ffffff",
+                    "secondary-container": "#d5e0f8",
+                    "primary": "#005c55",
+                    "secondary-fixed": "#d8e3fb",
+                    "on-error": "#ffffff",
+                    "background": "#f7f9fb",
+                    "on-surface-variant": "#3e4947",
+                    "on-tertiary": "#ffffff",
+                    "on-secondary-container": "#586377",
+                    "on-secondary-fixed-variant": "#3c475a",
+                    "on-primary-fixed-variant": "#00504a",
+                    "on-secondary-fixed": "#111c2d",
+                    "inverse-on-surface": "#eff1f3",
+                    "surface-tint": "#006a63",
+                    "on-tertiary-fixed": "#00201c",
+                    "outline-variant": "#bdc9c6",
+                    "on-tertiary-container": "#84ffec",
+                    "on-tertiary-fixed-variant": "#005048",
+                    "error": "#ba1a1a",
+                    "tertiary": "#005c52",
+                    "primary-fixed-dim": "#80d5cb",
+                    "on-error-container": "#93000a",
+                    "on-surface": "#191c1e",
+                    "surface-bright": "#f7f9fb",
+                    "surface-container-highest": "#e0e3e5",
+                    "on-primary-fixed": "#00201d",
+                    "surface-dim": "#d8dadc",
+                    "outline": "#6e7977",
+                    "primary-fixed": "#9cf2e8",
+                    "surface-container-low": "#f2f4f6",
+                    "tertiary-fixed-dim": "#4fdbc8",
+                    "on-secondary": "#ffffff",
+                    "on-primary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "surface-container": "#eceef0",
+                    "inverse-surface": "#2d3133",
+                    "tertiary-container": "#00776b",
+                    "on-background": "#191c1e",
+                    "tertiary-fixed": "#71f8e4",
+                    "surface-variant": "#e0e3e5",
+                    "primary-container": "#0f766e",
+                    "surface": "#f7f9fb",
+                    "secondary-fixed-dim": "#bcc7de",
+                    "inverse-primary": "#80d5cb",
+                    "on-primary-container": "#a3faef"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "page-padding": "24px",
+                    "topnav-height": "52px",
+                    "card-gap": "20px",
+                    "sidebar-width": "224px",
+                    "gutter": "16px"
+            },
+            "fontFamily": {
+                    "body-base": ["Inter"],
+                    "text-small": ["Inter"],
+                    "page-title": ["Inter"],
+                    "label-medium": ["Inter"],
+                    "section-title": ["Inter"]
+            },
+            "fontSize": {
+                    "body-base": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "text-small": ["12px", {"lineHeight": "16px", "fontWeight": "400"}],
+                    "page-title": ["24px", {"lineHeight": "32px", "fontWeight": "700"}],
+                    "label-medium": ["13px", {"lineHeight": "18px", "fontWeight": "500"}],
+                    "section-title": ["14px", {"lineHeight": "20px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            vertical-align: middle;
+        }
+        body { font-family: 'Inter', sans-serif; }
+    </style>
+</head>
+<body class="bg-background text-on-surface">
+<!-- TopNavBar -->
+<nav class="h-[52px] w-full fixed top-0 z-50 bg-on-background flex justify-between items-center px-page-padding shadow-sm">
+<div class="flex items-center gap-4">
+<span class="text-label-medium font-bold text-on-primary">Office Expense Manager</span>
+<div class="hidden md:flex gap-2">
+<a class="text-secondary-fixed px-3 py-1 font-label-medium text-label-medium hover:bg-secondary transition-all" href="#">Home</a>
+<a class="text-secondary-fixed px-3 py-1 font-label-medium text-label-medium hover:bg-secondary transition-all" href="#">My Expenses</a>
+<a class="bg-primary-container text-on-primary-container rounded-lg px-3 py-1 font-label-medium text-label-medium" href="#">Settlement</a>
+</div>
+</div>
+<div class="flex items-center gap-4">
+<button class="material-symbols-outlined text-primary-fixed">notifications</button>
+<button class="material-symbols-outlined text-primary-fixed">account_circle</button>
+<span class="text-primary-fixed font-label-medium text-label-medium ml-2">Log Out</span>
+</div>
+</nav>
+<!-- SideNavBar -->
+<aside class="w-[224px] h-screen fixed left-0 top-0 bg-on-background flex flex-col py-page-padding hidden lg:flex">
+<div class="px-6 mb-8 mt-12">
+<h1 class="text-on-primary font-bold text-body-base">Expense</h1>
+<p class="text-on-primary opacity-70 text-text-small">Manager</p>
+</div>
+<div class="flex flex-col flex-grow">
+<a class="text-secondary-fixed-dim px-4 py-2 mx-2 mb-1 hover:bg-secondary transition-colors duration-200 flex items-center gap-3 font-label-medium text-label-medium" href="#">
+<span class="material-symbols-outlined">dashboard</span> Dashboard
+            </a>
+<a class="text-secondary-fixed-dim px-4 py-2 mx-2 mb-1 hover:bg-secondary transition-colors duration-200 flex items-center gap-3 font-label-medium text-label-medium" href="#">
+<span class="material-symbols-outlined">group</span> Employees
+            </a>
+<a class="text-secondary-fixed-dim px-4 py-2 mx-2 mb-1 hover:bg-secondary transition-colors duration-200 flex items-center gap-3 font-label-medium text-label-medium" href="#">
+<span class="material-symbols-outlined">payments</span> Advance Give
+            </a>
+<a class="bg-primary text-on-primary rounded-lg px-4 py-2 mx-2 mb-1 flex items-center gap-3 font-label-medium text-label-medium" href="#">
+<span class="material-symbols-outlined">fact_check</span> Bill Review
+            </a>
+<a class="text-secondary-fixed-dim px-4 py-2 mx-2 mb-1 hover:bg-secondary transition-colors duration-200 flex items-center gap-3 font-label-medium text-label-medium" href="#">
+<span class="material-symbols-outlined">handshake</span> Settlement
+            </a>
+<a class="text-secondary-fixed-dim px-4 py-2 mx-2 mb-1 hover:bg-secondary transition-colors duration-200 flex items-center gap-3 font-label-medium text-label-medium" href="#">
+<span class="material-symbols-outlined">assessment</span> Reports
+            </a>
+</div>
+<div class="mt-auto">
+<a class="text-secondary-fixed-dim px-4 py-2 mx-2 mb-1 hover:bg-secondary transition-colors duration-200 flex items-center gap-3 font-label-medium text-label-medium" href="#">
+<span class="material-symbols-outlined">logout</span> Log Out
+            </a>
+</div>
+</aside>
+<!-- Content Canvas -->
+<main class="lg:ml-[224px] pt-[52px] min-h-screen">
+<div class="p-page-padding max-w-7xl mx-auto">
+<!-- Header Section -->
+<header class="mb-8 flex flex-col md:flex-row md:items-end justify-between gap-4">
+<div>
+
+<h1 class="font-page-title text-page-title text-on-surface">Review Bill - Ariful Islam</h1>
+<div class="flex items-center gap-4 mt-2">
+<span class="flex items-center gap-1 text-on-surface-variant font-label-medium text-label-medium">
+<span class="material-symbols-outlined text-[18px]">calendar_month</span> Submitted: Oct 24, 2023
+                        </span>
+<span class="px-3 py-1 bg-surface-container rounded-full text-on-surface text-label-medium font-label-medium">
+                            Emp ID: #3421
+                        </span>
+</div>
+</div>
+<div class="bg-surface-container-lowest border border-outline-variant rounded-xl p-4 flex gap-6 shadow-sm">
+<div class="text-center">
+<p class="text-text-small text-on-surface-variant uppercase tracking-wider mb-1">Current Advance</p>
+<p class="font-page-title text-primary text-[20px]">৳ 5,500.00</p>
+</div>
+</div>
+</header>
+<!-- Alerts / Flagged Issues Section -->
+<section class="mb-8">
+<div class="bg-error-container/30 border border-error/20 rounded-xl p-5">
+<div class="flex items-center gap-2 mb-3 text-error">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1;">warning</span>
+<h2 class="font-section-title text-section-title">Flagged Issues</h2>
+</div>
+<ul class="space-y-2">
+<li class="flex items-start gap-2 text-on-surface text-body-base">
+<span class="w-1.5 h-1.5 rounded-full bg-error mt-2"></span>
+<span class="">Lunch bill (Oct 22) exceeds the daily policy limit of ৳200.00.</span>
+</li>
+<li class="flex items-start gap-2 text-on-surface text-body-base">
+<span class="w-1.5 h-1.5 rounded-full bg-error mt-2"></span>
+<span class="">Conveyance cost for Uttara to Motijheel is 20% higher than average historical data.</span>
+</li>
+</ul>
+</div>
+</section>
+<!-- Main Bill Table Card -->
+<div class="bg-surface-container-lowest border border-slate-100 rounded-xl shadow-sm overflow-hidden mb-8">
+<div class="overflow-x-auto">
+<table class="w-full text-left border-collapse">
+<thead>
+<tr class="bg-surface-container-low border-b border-slate-100">
+<th class="px-6 py-4 font-label-medium text-label-medium text-on-surface-variant">Date</th>
+<th class="px-6 py-4 font-label-medium text-label-medium text-on-surface-variant">Description (From → To)</th>
+<th class="px-6 py-4 font-label-medium text-label-medium text-on-surface-variant">Purpose</th>
+<th class="px-6 py-4 font-label-medium text-label-medium text-on-surface-variant">Vehicle</th>
+<th class="px-6 py-4 font-label-medium text-label-medium text-on-surface-variant text-right">Submitted</th>
+<th class="px-6 py-4 font-label-medium text-label-medium text-on-surface-variant text-center">Approve Amount</th>
+</tr>
+</thead>
+<tbody class="divide-y divide-slate-100">
+<!-- Row 1 -->
+<tr class="hover:bg-background transition-colors">
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface">20 Oct, 2023</td>
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface">Dhanmondi → Mirpur 10</td>
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface">Client Meeting</td>
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface">Rickshaw</td>
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface text-right">৳ 120.00</td>
+<td class="px-6 py-4 flex justify-center">
+<input class="w-24 h-10 px-3 border border-slate-200 rounded-lg text-body-base focus:border-primary focus:ring-1 focus:ring-primary-fixed outline-none text-right" type="number" value="120">
+</td>
+</tr>
+<!-- Row 2 - Flagged -->
+<tr class="bg-error/5 hover:bg-error/10 transition-colors">
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface">
+<div class="flex items-center gap-2">
+                                        21 Oct, 2023
+                                        <span class="material-symbols-outlined text-error text-[18px]" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+</td>
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface">Uttara → Motijheel</td>
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface">HQ Visit</td>
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface">Uber/Pathao</td>
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface text-right">৳ 650.00</td>
+<td class="px-6 py-4 flex justify-center">
+<input class="w-24 h-10 px-3 border-2 border-primary rounded-lg text-body-base focus:ring-1 focus:ring-primary-fixed outline-none text-right bg-surface-container-lowest font-bold" type="number" value="500">
+</td>
+</tr>
+<!-- Row 3 - Flagged -->
+<tr class="bg-error/5 hover:bg-error/10 transition-colors">
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface">
+<div class="flex items-center gap-2">
+                                        22 Oct, 2023
+                                        <span class="material-symbols-outlined text-error text-[18px]" style="font-variation-settings: 'FILL' 1;">warning</span>
+</div>
+</td>
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface">Lunch Allowance</td>
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface">Field Duty</td>
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface">N/A</td>
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface text-right">৳ 350.00</td>
+<td class="px-6 py-4 flex justify-center">
+<input class="w-24 h-10 px-3 border-2 border-primary rounded-lg text-body-base focus:ring-1 focus:ring-primary-fixed outline-none text-right bg-surface-container-lowest font-bold" type="number" value="200">
+</td>
+</tr>
+<!-- Row 4 -->
+<tr class="hover:bg-background transition-colors">
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface">22 Oct, 2023</td>
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface">Motijheel → Banani</td>
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface">Site Visit</td>
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface">CNG</td>
+<td class="px-6 py-4 font-body-base text-body-base text-on-surface text-right">৳ 300.00</td>
+<td class="px-6 py-4 flex justify-center">
+<input class="w-24 h-10 px-3 border border-slate-200 rounded-lg text-body-base focus:border-primary focus:ring-1 focus:ring-primary-fixed outline-none text-right" type="number" value="300">
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+<div class="grid grid-cols-1 lg:grid-cols-3 gap-card-gap mb-8">
+<!-- Remarks Section -->
+<div class="lg:col-span-2 flex flex-col gap-4">
+<div class="bg-surface-container-lowest border border-slate-100 rounded-xl p-6 shadow-sm h-full">
+<label class="font-section-title text-section-title text-on-surface block mb-3">Review Notes (Optional)</label>
+<textarea class="w-full h-32 p-4 bg-background border border-slate-200 rounded-lg text-body-base focus:border-primary focus:ring-1 focus:ring-primary-fixed outline-none resize-none" placeholder="Explain any deductions or adjustments here..."></textarea>
+</div>
+</div>
+<!-- Summary Card -->
+<div class="flex flex-col gap-4">
+<div class="bg-surface-container-lowest border border-slate-100 rounded-xl p-6 shadow-sm">
+<h3 class="font-section-title text-section-title text-on-surface mb-6 border-b border-slate-50 pb-2">Calculation Summary</h3>
+<div class="space-y-4 mb-6">
+<div class="flex justify-between items-center">
+<span class="text-body-base text-on-surface-variant">Total Submitted Bill</span>
+<span class="font-section-title text-on-surface">৳ 1,420.00</span>
+</div>
+<div class="flex justify-between items-center text-primary">
+<span class="text-body-base font-semibold">Total Approved Bill</span>
+<span class="text-[18px] font-bold">৳ 1,120.00</span>
+</div>
+<div class="flex justify-between items-center text-on-surface-variant">
+<span class="text-body-base">Less Advance Taken</span>
+<span class="font-section-title text-error">৳ (5,500.00)</span>
+</div>
+</div>
+<!-- Settlement Alert Logic -->
+<div class="bg-[#fffbeb] border border-[#fef3c7] rounded-lg p-4 mb-2">
+<div class="flex items-center gap-2 mb-1 text-[#92400e]">
+<span class="material-symbols-outlined text-[20px]">money_off</span>
+<span class="font-section-title text-label-medium">Employee Return</span>
+</div>
+<p class="text-body-base text-[#92400e]">Employee needs to return <strong>৳ 4,380.00</strong> to the office.</p>
+</div>
+</div>
+</div>
+</div>
+<!-- Global Actions -->
+<div class="flex justify-end items-center gap-4 py-6 border-t border-slate-100">
+<button class="px-8 py-3 rounded-lg border border-error text-error font-section-title text-section-title hover:bg-error/5 transition-colors">
+                    Reject Submission
+                </button>
+<button class="px-10 py-3 rounded-lg bg-primary text-on-primary font-section-title text-section-title shadow-lg shadow-primary/20 hover:opacity-90 transition-opacity">
+                    Approve &amp; Submit Settlement
+                </button>
+</div>
+</div>
+</main>
+
+
+</body></html>
