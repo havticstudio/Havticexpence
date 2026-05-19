@@ -22,11 +22,19 @@ const MyLedger = () => {
   const pendingBills = { count: pending.length, total: pendingTotal };
 
   // Calculate office owed amount (employee will get from office)
-  const employeeOwedAmount = (stats.balance < 0 ? Math.abs(stats.balance) : 0) +
+  const employeeOwedAmount = 
     pending.reduce((sum, exp) => {
       const diff = exp.totalAmount - (exp.advance || 0);
       return sum + (diff > 0 ? diff : 0);
-    }, 0);
+    }, 0) +
+    myExpenses
+      .filter(exp => (exp.status === 'Approved' || exp.status === 'Settled') && exp.isReturned === false)
+      .reduce((sum, exp) => {
+        const bill = exp.approvedTotalAmount || exp.totalAmount || 0;
+        const adv = exp.advance || 0;
+        const diff = bill - adv;
+        return sum + (diff > 0 ? diff : 0);
+      }, 0);
 
   // Last settlement from approved
   const approved = myExpenses.filter(e => e.status === 'Approved' || e.status === 'Settled');

@@ -24,7 +24,7 @@ const Dashboard = () => {
 
   const payableList = (globalData.employees || [])
     .map(emp => {
-      const owed = (emp.balance < 0 ? Math.abs(emp.balance) : 0) + 
+      const owed = 
         (globalData.expenses || [])
           .filter(exp => {
             const id = exp.employee?._id || exp.employee;
@@ -32,6 +32,17 @@ const Dashboard = () => {
           })
           .reduce((sum, exp) => {
             const diff = exp.totalAmount - (exp.advance || 0);
+            return sum + (diff > 0 ? diff : 0);
+          }, 0) +
+        (globalData.expenses || [])
+          .filter(exp => {
+            const id = exp.employee?._id || exp.employee;
+            return id === emp._id && (exp.status === 'Approved' || exp.status === 'Settled') && exp.isReturned === false;
+          })
+          .reduce((sum, exp) => {
+            const bill = exp.approvedTotalAmount || exp.totalAmount || 0;
+            const adv = exp.advance || 0;
+            const diff = bill - adv;
             return sum + (diff > 0 ? diff : 0);
           }, 0);
       return { ...emp, owed };

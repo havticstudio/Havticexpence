@@ -170,7 +170,13 @@ router.post('/advances', auth, adminOnly, async (req, res) => {
     });
     await advance.save();
 
-    await Employee.findByIdAndUpdate(employee, { $inc: { balance: amount } });
+    const empDoc = await Employee.findById(employee);
+    if (empDoc) {
+      const currentBal = empDoc.balance || 0;
+      const baseBal = currentBal < 0 ? 0 : currentBal;
+      empDoc.balance = baseBal + amount;
+      await empDoc.save();
+    }
     res.status(201).json(advance);
   } catch (err) { res.status(400).json({ message: err.message }); }
 });
