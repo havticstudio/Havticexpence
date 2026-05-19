@@ -103,7 +103,7 @@ const Dashboard = () => {
     }
     const diffTime = target - today;
     const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-    
+
     return {
       dateStr: target.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
       daysRemaining: String(diffDays).padStart(2, '0')
@@ -125,7 +125,7 @@ const Dashboard = () => {
       {/* Top Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {/* Total Outstanding Advance */}
-        <div 
+        <div
           onClick={() => {
             setModalTab('receivable');
             setShowOutstandingModal(true);
@@ -148,7 +148,7 @@ const Dashboard = () => {
         </div>
 
         {/* Total Employee Payables */}
-        <div 
+        <div
           onClick={() => {
             setModalTab('payable');
             setShowOutstandingModal(true);
@@ -178,8 +178,8 @@ const Dashboard = () => {
           <div className="flex-1 min-w-0 space-y-1">
             <div className="flex items-center justify-between gap-1.5">
               <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest truncate">Monthly Expense</p>
-              <input 
-                type="month" 
+              <input
+                type="month"
                 value={selectedMonth}
                 onClick={(e) => e.stopPropagation()}
                 onChange={(e) => setSelectedMonth(e.target.value)}
@@ -191,7 +191,7 @@ const Dashboard = () => {
         </div>
 
         {/* Pending Bills */}
-        <div 
+        <div
           onClick={() => setShowPendingBillsModal(true)}
           className="bg-white p-6 rounded-2xl border border-[#e2e8f0] shadow-sm flex items-center gap-5 cursor-pointer hover:border-[#d97706]/40 hover:shadow-md transition-all active:scale-[0.99] group"
         >
@@ -253,13 +253,12 @@ const Dashboard = () => {
 
                   <div className="flex items-center gap-6">
                     <span className="font-black text-sm text-[#0f172a]">৳{bill.amount.toLocaleString()}</span>
-                    <span className={`px-3 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg border ${
-                      bill.status === 'Approved' || bill.status === 'Settled'
+                    <span className={`px-3 py-1 text-[9px] font-black uppercase tracking-wider rounded-lg border ${bill.status === 'Approved' || bill.status === 'Settled'
                         ? 'bg-green-50 text-green-700 border-green-200'
                         : bill.status === 'Rejected'
-                        ? 'bg-red-50 text-red-700 border-red-200'
-                        : 'bg-amber-50 text-amber-700 border-amber-200'
-                    }`}>
+                          ? 'bg-red-50 text-red-700 border-red-200'
+                          : 'bg-amber-50 text-amber-700 border-amber-200'
+                      }`}>
                       {bill.status}
                     </span>
                     <button onClick={() => navigate(`/admin/bill-review?id=${bill.id}`)} className="text-xs font-black text-[#0f766e] hover:text-[#0d9488] flex items-center gap-0.5">
@@ -369,7 +368,7 @@ const Dashboard = () => {
 
       {/* Outstanding Advance Details Modal */}
       {showOutstandingModal && (
-        <div 
+        <div
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowOutstandingModal(false);
@@ -389,7 +388,7 @@ const Dashboard = () => {
                   <p className="text-[10px] text-[#64748b] font-medium mt-0.5">Summary of outstanding advance balances and employee claims.</p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => {
                   setShowOutstandingModal(false);
                   setModalTab('receivable');
@@ -404,21 +403,19 @@ const Dashboard = () => {
             <div className="flex border-b border-[#e2e8f0] -mx-6 px-6">
               <button
                 onClick={() => setModalTab('receivable')}
-                className={`flex-1 pb-3 text-[11px] font-black uppercase tracking-wider border-b-2 transition-all ${
-                  modalTab === 'receivable'
+                className={`flex-1 pb-3 text-[11px] font-black uppercase tracking-wider border-b-2 transition-all ${modalTab === 'receivable'
                     ? 'border-[#0f766e] text-[#0f766e]'
                     : 'border-transparent text-[#64748b] hover:text-[#0f172a]'
-                }`}
+                  }`}
               >
                 অফিস পাবে (Receivables) ({receivableList.length})
               </button>
               <button
                 onClick={() => setModalTab('payable')}
-                className={`flex-1 pb-3 text-[11px] font-black uppercase tracking-wider border-b-2 transition-all ${
-                  modalTab === 'payable'
+                className={`flex-1 pb-3 text-[11px] font-black uppercase tracking-wider border-b-2 transition-all ${modalTab === 'payable'
                     ? 'border-[#0f766e] text-[#0f766e]'
                     : 'border-transparent text-[#64748b] hover:text-[#0f172a]'
-                }`}
+                  }`}
               >
                 কর্মচারী পাবে (Payables) ({payableList.length})
               </button>
@@ -448,7 +445,7 @@ const Dashboard = () => {
                 )
               ) : (
                 payableList.length > 0 ? (
-                payableList.map((emp) => (
+                  payableList.map((emp) => (
                     <div key={emp._id} className="py-3.5 flex items-center justify-between hover:bg-slate-50/50 px-2 rounded-xl transition-colors">
                       <div>
                         <h4 className="font-black text-sm text-[#0f172a] capitalize">{emp.name}</h4>
@@ -496,7 +493,7 @@ const Dashboard = () => {
       )}
       {/* Pending Bills Details Modal */}
       {showPendingBillsModal && (
-        <div 
+        <div
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setShowPendingBillsModal(false);
@@ -515,7 +512,7 @@ const Dashboard = () => {
                   <p className="text-[10px] text-[#64748b] font-medium mt-0.5">List of active bill submissions waiting for review.</p>
                 </div>
               </div>
-              <button 
+              <button
                 onClick={() => setShowPendingBillsModal(false)}
                 className="text-xs font-black text-[#64748b] hover:text-[#0f172a] uppercase tracking-wider bg-slate-100 hover:bg-slate-200 px-3 py-1.5 rounded-xl transition-all cursor-pointer"
               >
@@ -535,7 +532,7 @@ const Dashboard = () => {
                     </div>
                     <div className="flex items-center gap-3">
                       <span className="font-black text-sm text-[#0f172a]">৳{bill.totalAmount.toLocaleString()}</span>
-                      <button 
+                      <button
                         onClick={() => {
                           setShowPendingBillsModal(false);
                           navigate(`/admin/bill-review?id=${bill._id}`);
@@ -568,7 +565,7 @@ const Dashboard = () => {
 
       {/* Pay Confirmation Modal */}
       {payConfirmData && (
-        <div 
+        <div
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setPayConfirmData(null);
@@ -580,7 +577,7 @@ const Dashboard = () => {
             <div className="w-14 h-14 rounded-full bg-teal-50 text-[#0f766e] flex items-center justify-center mx-auto shadow-inner animate-pulse">
               <LuWallet size={28} />
             </div>
-            
+
             <div className="space-y-2">
               <h3 className="font-black text-lg text-[#0f172a] uppercase tracking-tight">Confirm Payment</h3>
               <p className="text-xs text-[#64748b] font-semibold leading-relaxed">
@@ -594,14 +591,14 @@ const Dashboard = () => {
                 onClick={() => setPayConfirmData(null)}
                 className="flex-1 py-3 border border-[#cbd5e1] hover:bg-[#f8fafc] text-[#64748b] font-black text-xs uppercase tracking-widest rounded-xl transition-all cursor-pointer"
               >
-                No, Cancel
+                No
               </button>
               <button
                 type="button"
                 onClick={handleConfirmPay}
                 className="flex-1 py-3 bg-[#0f766e] hover:bg-[#0d9488] text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg shadow-teal-700/10 active:scale-95 transition-all cursor-pointer"
               >
-                Yes, Pay
+                Yes
               </button>
             </div>
           </div>

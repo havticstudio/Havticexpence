@@ -290,6 +290,10 @@ router.put('/expenses/:id/approve', auth, adminOnly, async (req, res) => {
     const expense = await Expense.findById(req.params.id);
     if (!expense) return res.status(404).json({ message: 'Expense not found' });
 
+    const wasApproved = expense.status === 'Approved' || expense.status === 'Settled';
+    const oldBill = wasApproved ? (expense.approvedTotalAmount !== undefined ? expense.approvedTotalAmount : expense.totalAmount) : 0;
+    const oldCoveredAmount = Math.min(oldBill, expense.advance || 0);
+
     const { items, approvedTotalAmount, reviewNotes, isReturned } = req.body;
 
     expense.status = 'Approved';
@@ -313,37 +317,46 @@ router.put('/expenses/:id/approve', auth, adminOnly, async (req, res) => {
 
     await expense.save();
 
-    // Create settlement
+    // Create or update settlement
     const advance = expense.advance || 0;
     const bill = expense.approvedTotalAmount || expense.totalAmount || 0;
     const diff = advance - bill;
+    const newCoveredAmount = Math.min(bill, advance);
+    const deltaCovered = newCoveredAmount - oldCoveredAmount;
 
-    const settlement = new Settlement({
-      employee: expense.employee,
-      employeeName: expense.employeeName,
-      expense: expense._id,
-      advance,
-      billTotal: bill,
-      amount: Math.abs(diff),
-      type: diff >= 0 ? 'Employee Return' : 'Office Pay',
-    });
-    await settlement.save();
+    let settlement = await Settlement.findOne({ expense: expense._id });
+    if (settlement) {
+      settlement.advance = advance;
+      settlement.billTotal = bill;
+      settlement.amount = Math.abs(diff);
+      settlement.type = diff >= 0 ? 'Employee Return' : 'Office Pay';
+      await settlement.save();
+    } else {
+      settlement = new Settlement({
+        employee: expense.employee,
+        employeeName: expense.employeeName,
+        expense: expense._id,
+        advance,
+        billTotal: bill,
+        amount: Math.abs(diff),
+        type: diff >= 0 ? 'Employee Return' : 'Office Pay',
+      });
+      await settlement.save();
+    }
 
     // Update the linked Advance's remainingAmount
     if (expense.advanceId) {
       const adv = await Advance.findById(expense.advanceId);
       if (adv) {
         const currentRemaining = adv.remainingAmount !== undefined ? adv.remainingAmount : adv.amount;
-        const deduction = Math.min(bill, currentRemaining);
-        adv.remainingAmount = currentRemaining - deduction;
+        adv.remainingAmount = currentRemaining - deltaCovered;
         await adv.save();
       }
     }
 
     // Update employee balance
     if (expense.employee) {
-      const coveredAmount = Math.min(bill, expense.advance);
-      await Employee.findByIdAndUpdate(expense.employee, { $inc: { balance: -coveredAmount } });
+      await Employee.findByIdAndUpdate(expense.employee, { $inc: { balance: -deltaCovered } });
     }
 
     res.json({ message: 'Approved and settled', settlement });
