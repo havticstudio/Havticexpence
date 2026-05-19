@@ -492,7 +492,6 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-      </div>
       )}
       {/* Pending Bills Details Modal */}
       {showPendingBillsModal && (
@@ -564,7 +563,6 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
-      </div>
       )}
     </div>
   );
