@@ -11,6 +11,26 @@ const Dashboard = () => {
   const [showOutstandingModal, setShowOutstandingModal] = useState(false);
   const [showPendingBillsModal, setShowPendingBillsModal] = useState(false);
   const [modalTab, setModalTab] = useState('receivable');
+  const [payingId, setPayingId] = useState(null);
+
+  const handlePayEmployeeClaims = async (employeeId, employeeName, amount) => {
+    if (!window.confirm(`Are you sure you want to pay ৳${amount.toLocaleString()} to ${employeeName}? This will settle all their approved outstanding claims.`)) {
+      return;
+    }
+    setPayingId(employeeId);
+    try {
+      await axios.post(`http://localhost:5000/api/employees/${employeeId}/pay-claims`, {}, {
+        headers: { Authorization: `Bearer ${user?.token}` }
+      });
+      alert(`Successfully paid ৳${amount.toLocaleString()} to ${employeeName}!`);
+      await refreshGlobalData();
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Failed to settle claims.');
+    } finally {
+      setPayingId(null);
+    }
+  };
   const [selectedMonth, setSelectedMonth] = useState(() => {
     const d = new Date();
     const y = d.getFullYear();
@@ -24,27 +44,17 @@ const Dashboard = () => {
 
   const payableList = (globalData.employees || [])
     .map(emp => {
-      const owed = 
-        (globalData.expenses || [])
-          .filter(exp => {
-            const id = exp.employee?._id || exp.employee;
-            return id === emp._id && exp.status === 'Pending';
-          })
-          .reduce((sum, exp) => {
-            const diff = exp.totalAmount - (exp.advance || 0);
-            return sum + (diff > 0 ? diff : 0);
-          }, 0) +
-        (globalData.expenses || [])
-          .filter(exp => {
-            const id = exp.employee?._id || exp.employee;
-            return id === emp._id && (exp.status === 'Approved' || exp.status === 'Settled') && exp.isReturned === false;
-          })
-          .reduce((sum, exp) => {
-            const bill = exp.approvedTotalAmount || exp.totalAmount || 0;
-            const adv = exp.advance || 0;
-            const diff = bill - adv;
-            return sum + (diff > 0 ? diff : 0);
-          }, 0);
+      const owed = (globalData.expenses || [])
+        .filter(exp => {
+          const id = exp.employee?._id || exp.employee;
+          return id === emp._id && (exp.status === 'Approved' || exp.status === 'Settled') && exp.isReturned === false;
+        })
+        .reduce((sum, exp) => {
+          const bill = exp.approvedTotalAmount || exp.totalAmount || 0;
+          const adv = exp.advance || 0;
+          const diff = bill - adv;
+          return sum + (diff > 0 ? diff : 0);
+        }, 0);
       return { ...emp, owed };
     })
     .filter(emp => emp.owed > 0)
@@ -114,13 +124,25 @@ const Dashboard = () => {
       {/* Top Cards Grid */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 gap-6">
         {/* Total Outstanding Advance */}
-        <div className="bg-white p-6 rounded-2xl border border-[#e2e8f0] shadow-sm flex items-center gap-5">
-          <div className="w-12 h-12 rounded-full bg-[#f0fdfa] flex items-center justify-center text-[#0f766e] shrink-0">
+        <div 
+          onClick={() => {
+            setModalTab('receivable');
+            setShowOutstandingModal(true);
+          }}
+          className="bg-white p-6 rounded-2xl border border-[#e2e8f0] shadow-sm flex items-center gap-5 cursor-pointer hover:border-[#0f766e]/40 hover:shadow-md transition-all active:scale-[0.99] group"
+        >
+          <div className="w-12 h-12 rounded-full bg-[#f0fdfa] flex items-center justify-center text-[#0f766e] shrink-0 group-hover:scale-110 transition-transform">
             <LuWallet size={24} />
           </div>
           <div className="flex-1 min-w-0">
-            <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest truncate">Outstanding Advance</p>
+            <div className="flex items-center justify-between gap-1">
+              <p className="text-[10px] font-black text-[#94a3b8] uppercase tracking-widest truncate">Outstanding Advance</p>
+              <span className="text-[8px] bg-[#f0fdfa] text-[#0f766e] px-1.5 py-0.5 rounded-full font-black border border-teal-100 uppercase tracking-widest no-print shrink-0">View</span>
+            </div>
             <p className="text-2xl font-black text-[#0f172a] mt-0.5">৳{stats.totalOutstanding.toLocaleString()}</p>
+            <span className="text-[9px] font-bold text-[#0f766e] opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-0.5 mt-1 no-print">
+              View Breakdown <LuArrowRight size={10} />
+            </span>
           </div>
         </div>
 
@@ -417,17 +439,28 @@ const Dashboard = () => {
                 )
               ) : (
                 payableList.length > 0 ? (
-                  payableList.map((emp) => (
-                    <div key={emp._id} className="py-3 flex items-center justify-between">
+                payableList.map((emp) => (
+                    <div key={emp._id} className="py-3.5 flex items-center justify-between hover:bg-slate-50/50 px-2 rounded-xl transition-colors">
                       <div>
                         <h4 className="font-black text-sm text-[#0f172a] capitalize">{emp.name}</h4>
-                        <p className="text-[10px] text-[#64748b] font-bold mt-0.5">
-                          Employee ID: #{emp.employeeId || emp.phone?.slice(-4) || 'N/A'} • <span className="text-[#0f766e]">{emp.department || 'General'}</span>
+                        <p className="text-[10px] text-[#64748b] font-bold mt-0.5 flex items-center gap-1.5">
+                          <span>ID: #{emp.employeeId || emp.phone?.slice(-4) || 'N/A'}</span>
+                          <span className="w-1 h-1 bg-[#cbd5e1] rounded-full"></span>
+                          <span className="text-[#0f766e]">{emp.department || 'General'}</span>
                         </p>
                       </div>
-                      <div className="bg-amber-50 border border-amber-200 px-3.5 py-1.5 rounded-2xl text-right">
-                        <span className="text-[8px] font-black text-amber-700 uppercase tracking-wider block">Owed Amount</span>
-                        <span className="font-black text-sm text-amber-700">৳{emp.owed.toLocaleString()}</span>
+                      <div className="flex items-center gap-3">
+                        <div className="bg-amber-50 border border-amber-200 px-3.5 py-1.5 rounded-2xl text-right">
+                          <span className="text-[8px] font-black text-amber-700 uppercase tracking-wider block">Owed Amount</span>
+                          <span className="font-black text-sm text-amber-700">৳{emp.owed.toLocaleString()}</span>
+                        </div>
+                        <button
+                          onClick={() => handlePayEmployeeClaims(emp._id, emp.name, emp.owed)}
+                          disabled={payingId === emp._id}
+                          className="bg-[#0f766e] hover:bg-[#0d9488] disabled:opacity-50 text-white font-black text-[10px] uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-md shadow-teal-700/10 active:scale-95 transition-all cursor-pointer flex items-center gap-1 shrink-0"
+                        >
+                          {payingId === emp._id ? 'Paying...' : 'Pay'}
+                        </button>
                       </div>
                     </div>
                   ))

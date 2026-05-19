@@ -421,6 +421,28 @@ router.delete('/companies/:id', auth, adminOnly, async (req, res) => {
   } catch (err) { res.status(400).json({ message: err.message }); }
 });
 
+// Pay all outstanding claims for a specific employee
+router.post('/employees/:id/pay-claims', auth, adminOnly, async (req, res) => {
+  try {
+    const employeeId = req.params.id;
+    const unpaidExpenses = await Expense.find({
+      employee: employeeId,
+      status: { $in: ['Approved', 'Settled'] },
+      isReturned: false
+    });
+
+    for (const exp of unpaidExpenses) {
+      const bill = exp.approvedTotalAmount || exp.totalAmount || 0;
+      const adv = exp.advance || 0;
+      if (bill > adv) {
+        exp.isReturned = true;
+        await exp.save();
+      }
+    }
+    res.json({ message: 'All outstanding claims paid successfully' });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
 // ===================== LEDGER (Employee) =====================
 
 router.get('/ledger/my', auth, async (req, res) => {
