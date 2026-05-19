@@ -1,17 +1,25 @@
 import React from 'react';
 import { useAuth } from '../context/AuthContext';
-import { LuBell, LuChevronRight, LuUser } from 'react-icons/lu';
+import { LuBell, LuChevronRight, LuUser, LuMenu } from 'react-icons/lu';
 
-const TopBar = () => {
+const TopBar = ({ onMenuToggle }) => {
   const { user } = useAuth();
 
   return (
-    <header className="h-[64px] bg-[#141718] border-b border-white/5 flex items-center justify-between px-8 sticky top-0 z-40">
-      <div className="flex items-center gap-6">
-        <div className="flex items-center gap-4">
-          <span className="text-white/30 text-[10px] font-black uppercase tracking-[0.2em]">Home</span>
-          <LuChevronRight size={14} className="text-white/10" />
-          <span className="text-white text-[10px] font-black uppercase tracking-[0.2em]">{user?.role === 'admin' ? 'Admin Dashboard' : 'My Ledger'}</span>
+    <header className="h-[64px] bg-[#141718] border-b border-white/5 flex items-center justify-between px-4 md:px-8 sticky top-0 z-40">
+      <div className="flex items-center gap-4 md:gap-6">
+        {/* Hamburger Menu Toggle for Mobile */}
+        <button 
+          onClick={onMenuToggle}
+          className="lg:hidden p-2 rounded-xl text-white/50 hover:text-white active:bg-white/5 transition-all cursor-pointer"
+        >
+          <LuMenu size={22} />
+        </button>
+
+        <div className="flex items-center gap-2 md:gap-4">
+          <span className="text-white/30 text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em] hidden sm:inline">Home</span>
+          <LuChevronRight size={14} className="text-white/10 hidden sm:inline" />
+          <span className="text-white text-[9px] md:text-[10px] font-black uppercase tracking-[0.2em]">{user?.role === 'admin' ? 'Admin Dashboard' : 'My Ledger'}</span>
         </div>
       </div>
       

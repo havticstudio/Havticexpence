@@ -15,7 +15,7 @@ import {
   LuFileText
 } from 'react-icons/lu';
 
-const Sidebar = () => {
+const Sidebar = ({ isOpen, onClose }) => {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
 
@@ -41,14 +41,23 @@ const Sidebar = () => {
 
   const handleLogout = () => {
     logout();
+    if (onClose) onClose();
     navigate('/login');
   };
 
   return (
-    <aside className="w-[240px] h-screen fixed left-0 top-0 bg-[#141718] flex flex-col py-6 z-50">
+    <aside className={`w-[240px] h-screen fixed left-0 top-0 bg-[#141718] flex flex-col py-6 z-50 transition-transform duration-300 ${
+      isOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'
+    }`}>
       {/* Brand Logo */}
-      <div className="px-6 mb-12">
-        <div className="flex items-center gap-3 cursor-pointer" onClick={() => navigate(user?.role === 'admin' ? '/admin' : '/employee')}>
+      <div className="px-6 mb-12 flex items-center justify-between">
+        <div 
+          className="flex items-center gap-3 cursor-pointer" 
+          onClick={() => {
+            if (onClose) onClose();
+            navigate(user?.role === 'admin' ? '/admin' : '/employee');
+          }}
+        >
           <Logo size="sm" variant="light" />
         </div>
       </div>
@@ -59,6 +68,7 @@ const Sidebar = () => {
           <NavLink
             key={item.name}
             to={item.path}
+            onClick={onClose}
             end={item.path === '/admin' || item.path === '/employee'}
             className={({ isActive }) => 
               `flex items-center gap-4 px-4 py-3.5 rounded-2xl transition-all duration-300 group ${
