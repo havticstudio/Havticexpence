@@ -12,17 +12,18 @@ const Dashboard = () => {
   const [showPendingBillsModal, setShowPendingBillsModal] = useState(false);
   const [modalTab, setModalTab] = useState('receivable');
   const [payingId, setPayingId] = useState(null);
+  const [payConfirmData, setPayConfirmData] = useState(null);
 
-  const handlePayEmployeeClaims = async (employeeId, employeeName, amount) => {
-    if (!window.confirm(`Are you sure you want to pay ৳${amount.toLocaleString()} to ${employeeName}? This will settle all their approved outstanding claims.`)) {
-      return;
-    }
-    setPayingId(employeeId);
+  const handleConfirmPay = async () => {
+    if (!payConfirmData) return;
+    const { id, name, amount } = payConfirmData;
+    setPayingId(id);
+    setPayConfirmData(null);
     try {
-      await axios.post(`http://localhost:5000/api/employees/${employeeId}/pay-claims`, {}, {
+      await axios.post(`http://localhost:5000/api/employees/${id}/pay-claims`, {}, {
         headers: { Authorization: `Bearer ${user?.token}` }
       });
-      alert(`Successfully paid ৳${amount.toLocaleString()} to ${employeeName}!`);
+      alert(`Successfully paid ৳${amount.toLocaleString()} to ${name}!`);
       await refreshGlobalData();
     } catch (err) {
       console.error(err);
@@ -463,7 +464,7 @@ const Dashboard = () => {
                           <span className="font-black text-sm text-amber-700">৳{emp.owed.toLocaleString()}</span>
                         </div>
                         <button
-                          onClick={() => handlePayEmployeeClaims(emp._id, emp.name, emp.owed)}
+                          onClick={() => setPayConfirmData({ id: emp._id, name: emp.name, amount: emp.owed })}
                           disabled={payingId === emp._id}
                           className="bg-[#0f766e] hover:bg-[#0d9488] disabled:opacity-50 text-white font-black text-[10px] uppercase tracking-wider px-4 py-2.5 rounded-xl shadow-md shadow-teal-700/10 active:scale-95 transition-all cursor-pointer flex items-center gap-1 shrink-0"
                         >
@@ -560,6 +561,48 @@ const Dashboard = () => {
               <span className="text-xl font-black text-[#d97706]">
                 ৳{pendingBillsList.reduce((sum, bill) => sum + bill.totalAmount, 0).toLocaleString()}
               </span>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Pay Confirmation Modal */}
+      {payConfirmData && (
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setPayConfirmData(null);
+            }
+          }}
+          className="fixed inset-0 bg-[#0f172a]/70 backdrop-blur-sm z-[99999] flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div className="bg-white rounded-3xl max-w-sm w-full border border-[#cbd5e1]/30 shadow-2xl p-6 space-y-5 animate-in fade-in zoom-in duration-200 cursor-default text-center">
+            <div className="w-14 h-14 rounded-full bg-teal-50 text-[#0f766e] flex items-center justify-center mx-auto shadow-inner animate-pulse">
+              <LuWallet size={28} />
+            </div>
+            
+            <div className="space-y-2">
+              <h3 className="font-black text-lg text-[#0f172a] uppercase tracking-tight">Confirm Payment</h3>
+              <p className="text-xs text-[#64748b] font-semibold leading-relaxed">
+                Are you sure you want to pay <span className="text-[#0f766e] font-black text-sm">৳{payConfirmData.amount.toLocaleString()}</span> to <span className="text-[#0f172a] font-black">{payConfirmData.name}</span>? This will settle all their approved outstanding claims.
+              </p>
+            </div>
+
+            <div className="flex gap-3 justify-center pt-2">
+              <button
+                type="button"
+                onClick={() => setPayConfirmData(null)}
+                className="flex-1 py-3 border border-[#cbd5e1] hover:bg-[#f8fafc] text-[#64748b] font-black text-xs uppercase tracking-widest rounded-xl transition-all cursor-pointer"
+              >
+                No, Cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleConfirmPay}
+                className="flex-1 py-3 bg-[#0f766e] hover:bg-[#0d9488] text-white font-black text-xs uppercase tracking-widest rounded-xl shadow-lg shadow-teal-700/10 active:scale-95 transition-all cursor-pointer"
+              >
+                Yes, Pay
+              </button>
             </div>
           </div>
         </div>
