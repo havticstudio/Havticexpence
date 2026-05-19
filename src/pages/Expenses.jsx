@@ -682,8 +682,16 @@ const Expenses = () => {
 
       {/* Rejection Reason Modal */}
       {showRejectModal && (
-        <div className="fixed inset-0 bg-[#0f172a]/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-md w-full border border-[#cbd5e1]/30 shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in duration-200">
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowRejectModal(false);
+              setRejectionReasonInput('');
+            }
+          }}
+          className="fixed inset-0 bg-[#0f172a]/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div className="bg-white rounded-3xl max-w-md w-full border border-[#cbd5e1]/30 shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in duration-200 cursor-default">
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-2xl bg-red-50 flex items-center justify-center text-red-500 shrink-0">
                 <LuTriangleAlert size={20} />
@@ -725,6 +733,7 @@ const Expenses = () => {
             </div>
           </div>
         </div>
+      </div>
       )}
     </div>
   );

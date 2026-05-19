@@ -368,8 +368,16 @@ const Dashboard = () => {
 
       {/* Outstanding Advance Details Modal */}
       {showOutstandingModal && (
-        <div className="fixed inset-0 bg-[#0f172a]/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full border border-[#cbd5e1]/30 shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in duration-200">
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowOutstandingModal(false);
+              setModalTab('receivable');
+            }
+          }}
+          className="fixed inset-0 bg-[#0f172a]/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div className="bg-white rounded-3xl max-w-lg w-full border border-[#cbd5e1]/30 shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in duration-200 cursor-default">
             <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-teal-50 flex items-center justify-center text-[#0f766e] shrink-0">
@@ -484,11 +492,19 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+      </div>
       )}
       {/* Pending Bills Details Modal */}
       {showPendingBillsModal && (
-        <div className="fixed inset-0 bg-[#0f172a]/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4">
-          <div className="bg-white rounded-3xl max-w-lg w-full border border-[#cbd5e1]/30 shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in duration-200">
+        <div 
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setShowPendingBillsModal(false);
+            }
+          }}
+          className="fixed inset-0 bg-[#0f172a]/60 backdrop-blur-sm z-[9999] flex items-center justify-center p-4 cursor-pointer"
+        >
+          <div className="bg-white rounded-3xl max-w-lg w-full border border-[#cbd5e1]/30 shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in duration-200 cursor-default">
             <div className="flex items-center justify-between border-b border-[#e2e8f0] pb-3">
               <div className="flex items-center gap-3">
                 <div className="w-10 h-10 rounded-2xl bg-amber-50 flex items-center justify-center text-[#d97706] shrink-0">
@@ -548,6 +564,7 @@ const Dashboard = () => {
             </div>
           </div>
         </div>
+      </div>
       )}
     </div>
   );
