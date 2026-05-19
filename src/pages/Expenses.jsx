@@ -733,7 +733,6 @@ const Expenses = () => {
             </div>
           </div>
         </div>
-      </div>
       )}
     </div>
   );
